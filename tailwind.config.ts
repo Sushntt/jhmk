@@ -9,30 +9,57 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // Warm stone running to espresso. The previous 50 was #faf9f7 -
+        // effectively white - which made every page glare, with pure-white
+        // cards sitting on top of it. Dropping the page background's luminance
+        // and lifting cards to a soft off-white gives depth instead of glare.
         brand: {
-          50: "#faf9f7",
-          100: "#f5f3ef",
-          200: "#e8e4dc",
-          300: "#d4cec2",
-          400: "#b8b0a0",
-          500: "#9a8f7e",
-          600: "#7d7264",
-          700: "#5e554a",
-          800: "#3d3730",
-          900: "#1f1c18",
-          950: "#0f0e0c",
+          50: "#efe9df",
+          100: "#e5ded1",
+          200: "#d5c9b6",
+          300: "#bcab91",
+          400: "#9d8b6f",
+          500: "#7f6e56",
+          600: "#655643",
+          700: "#4b4033",
+          800: "#332b23",
+          900: "#1d1811",
+          950: "#12100b",
         },
+        // Cards and panels. Lighter than the page so surfaces separate, but
+        // still warm - never pure #fff.
+        surface: {
+          DEFAULT: "#fbf8f3",
+          muted: "#f6f1e9",
+        },
+        // Secondary accent: deep oxblood, drawn from the maroon saree in the
+        // brand photography and common in South Indian temple jewellery.
+        // Gives sale/status moments somewhere to live other than gold.
+        spice: {
+          50: "#fbf1f0",
+          100: "#f5ddda",
+          200: "#e6b8b2",
+          300: "#d18b82",
+          400: "#b55f54",
+          500: "#94413a",
+          600: "#7a332e",
+          700: "#5f2724",
+          800: "#461d1b",
+          900: "#301413",
+        },
+        // Antique gold - slightly deeper and less brassy than before so it
+        // reads as metal rather than yellow against the warmer background.
         gold: {
-          50: "#fdf8f0",
-          100: "#f9ecd6",
-          200: "#f0d4a8",
-          300: "#e4b56e",
-          400: "#d49a3e",
-          500: "#c4841e",
-          600: "#a86a12",
-          700: "#8a530e",
-          800: "#6d410c",
-          900: "#52330d",
+          50: "#fbf5ea",
+          100: "#f4e6cc",
+          200: "#e8cd9c",
+          300: "#d9ae67",
+          400: "#c8913e",
+          500: "#b17724",
+          600: "#95601a",
+          700: "#794b15",
+          800: "#5d3a13",
+          900: "#452c12",
         },
       },
       fontFamily: {

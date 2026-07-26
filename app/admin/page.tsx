@@ -26,7 +26,7 @@ interface AnalyticsPayload {
   topProducts: { name: string; sales: number; revenue: number }[]
   revenueTrend: { date: string; revenue: number; orders: number }[]
   customerList: CustomerSummary[]
-  recentOrders: { id: string; customerName: string; total: number; status: string; createdAt: string }[]
+  recentOrders: { id: string; customerName: string; total: number; status: string; createdAt: string; createdTime: string }[]
 }
 
 function MiniBar({ value, max, color = "bg-gold-500" }: { value: number; max: number; color?: string }) {
@@ -36,6 +36,31 @@ function MiniBar({ value, max, color = "bg-gold-500" }: { value: number; max: nu
       <div className={`h-full ${color} rounded-full transition-[width] duration-700 ease-out`} style={{ width: `${pct}%` }} />
     </div>
   )
+}
+
+// Every status gets its own colour, including cancelled - previously anything
+// that wasn't delivered or shipped fell through to yellow, so a cancelled order
+// looked identical to one awaiting payment.
+function adminStatusClass(status: string): string {
+  switch (status.trim().toLowerCase()) {
+    case "delivered":
+      return "bg-green-100 text-green-700"
+    case "shipped":
+      return "bg-purple-100 text-purple-700"
+    case "confirmed":
+      return "bg-blue-100 text-blue-700"
+    case "cancelled":
+      return "bg-spice-100 text-spice-700"
+    default:
+      return "bg-yellow-100 text-yellow-700"
+  }
+}
+
+// "Created At" is a human-readable string now, so formatDate() would return
+// "Invalid Date". Only format when the value is still a raw ISO timestamp.
+function adminDate(order: { createdAt: string; createdTime: string }): string {
+  const raw = order.createdAt || order.createdTime
+  return /^\d{4}-\d{2}-\d{2}T/.test(raw) ? formatDate(raw) : raw
 }
 
 function RevenueTrendChart({ data }: { data: { date: string; revenue: number; orders: number }[] }) {
@@ -195,7 +220,7 @@ export default function AdminDashboard() {
           { label: "Avg Order Value", value: formatPrice(data.avgOrderValue), icon: TrendingUp },
         ].map((kpi) => (
           <Reveal key={kpi.label}>
-            <div className="bg-white p-6 rounded-lg border border-brand-200">
+            <div className="bg-surface p-6 rounded-lg border border-brand-200">
               <div className="p-2 bg-brand-100 rounded-lg w-fit mb-4">
                 <kpi.icon className="w-5 h-5 text-brand-700" />
               </div>
@@ -233,7 +258,7 @@ export default function AdminDashboard() {
 
       {/* Revenue Trend */}
       <Reveal className="mb-12">
-        <div className="bg-white p-6 rounded-lg border border-brand-200">
+        <div className="bg-surface p-6 rounded-lg border border-brand-200">
           <div className="flex items-baseline justify-between mb-6">
             <h2 className="text-lg font-medium text-brand-900">Revenue Trend</h2>
             <span className="text-xs text-brand-400">
@@ -249,7 +274,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
         {/* Top Products */}
         <Reveal>
-          <div className="bg-white p-6 rounded-lg border border-brand-200">
+          <div className="bg-surface p-6 rounded-lg border border-brand-200">
             <h2 className="text-lg font-medium text-brand-900 mb-6">Top Selling Products</h2>
             {data.topProducts.length === 0 ? (
               <p className="text-sm text-brand-400">No sales yet.</p>
@@ -274,34 +299,46 @@ export default function AdminDashboard() {
 
         {/* Recent Orders */}
         <Reveal delay={0.1}>
-          <div className="bg-white p-6 rounded-lg border border-brand-200">
+          <div className="bg-surface p-6 rounded-lg border border-brand-200">
             <h2 className="text-lg font-medium text-brand-900 mb-6">Recent Orders</h2>
             {data.recentOrders.length === 0 ? (
               <p className="text-sm text-brand-400">No orders yet.</p>
             ) : (
               <div className="space-y-4">
-                {data.recentOrders.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between p-3 bg-brand-50 rounded-lg">
-                    <div>
-                      <p className="text-sm font-medium text-brand-900">{order.customerName}</p>
-                      <p className="text-xs text-brand-500">{formatDate(order.createdAt)}</p>
+                {data.recentOrders.map((order) => {
+                  const isCancelled = order.status.trim().toLowerCase() === "cancelled"
+                  return (
+                    <div
+                      key={order.id}
+                      className={`flex items-center justify-between p-3 rounded-lg ${
+                        isCancelled ? "bg-brand-100/60" : "bg-brand-100"
+                      }`}
+                    >
+                      <div className="min-w-0">
+                        <p
+                          className={`text-sm font-medium truncate ${
+                            isCancelled ? "text-brand-500 line-through" : "text-brand-900"
+                          }`}
+                        >
+                          {order.customerName}
+                        </p>
+                        <p className="text-xs text-brand-500">{adminDate(order)}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0 ml-3">
+                        <p
+                          className={`text-sm font-medium ${
+                            isCancelled ? "text-brand-400 line-through" : "text-brand-900"
+                          }`}
+                        >
+                          {formatPrice(order.total)}
+                        </p>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${adminStatusClass(order.status)}`}>
+                          {order.status}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-brand-900">{formatPrice(order.total)}</p>
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded-full ${
-                          order.status === "delivered"
-                            ? "bg-green-100 text-green-700"
-                            : order.status === "shipped"
-                            ? "bg-purple-100 text-purple-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        }`}
-                      >
-                        {order.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>
@@ -315,7 +352,7 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
         <Reveal>
-          <div className="bg-white p-6 rounded-lg border border-brand-200">
+          <div className="bg-surface p-6 rounded-lg border border-brand-200">
             <div className="p-2 bg-brand-100 rounded-lg w-fit mb-4">
               <Users className="w-5 h-5 text-brand-700" />
             </div>
@@ -324,7 +361,7 @@ export default function AdminDashboard() {
           </div>
         </Reveal>
         <Reveal delay={0.05}>
-          <div className="bg-white p-6 rounded-lg border border-brand-200">
+          <div className="bg-surface p-6 rounded-lg border border-brand-200">
             <div className="p-2 bg-brand-100 rounded-lg w-fit mb-4">
               <Repeat className="w-5 h-5 text-brand-700" />
             </div>
@@ -333,7 +370,7 @@ export default function AdminDashboard() {
           </div>
         </Reveal>
         <Reveal delay={0.1}>
-          <div className="bg-white p-6 rounded-lg border border-brand-200">
+          <div className="bg-surface p-6 rounded-lg border border-brand-200">
             <div className="p-2 bg-brand-100 rounded-lg w-fit mb-4">
               <Users className="w-5 h-5 text-brand-700" />
             </div>
@@ -344,7 +381,7 @@ export default function AdminDashboard() {
       </div>
 
       <Reveal delay={0.15}>
-        <div className="bg-white p-6 rounded-lg border border-brand-200">
+        <div className="bg-surface p-6 rounded-lg border border-brand-200">
           <h3 className="text-lg font-medium text-brand-900 mb-6">Top Customers</h3>
           {data.customerList.length === 0 ? (
             <p className="text-sm text-brand-400">No customers yet.</p>

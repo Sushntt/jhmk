@@ -113,7 +113,7 @@ export default function OrdersPage() {
           </div>
         ) : orders.length === 0 ? (
           <Reveal>
-            <div className="text-center py-16 bg-white rounded-lg border border-brand-200">
+            <div className="text-center py-16 bg-surface rounded-lg border border-brand-200">
               <Package className="w-16 h-16 text-brand-300 mx-auto mb-4" />
               <p className="text-brand-500 text-lg">No orders yet</p>
               <p className="text-brand-400 text-sm mt-2">Your order history will appear here</p>
@@ -122,7 +122,7 @@ export default function OrdersPage() {
         ) : (
           orders.map((order, i) => (
             <Reveal key={order.id} delay={i * 0.1}>
-              <div className="bg-white rounded-lg border border-brand-200 overflow-hidden">
+              <div className="bg-surface rounded-lg border border-brand-200 overflow-hidden">
                 <div className="p-6 border-b border-brand-100 flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="text-sm text-brand-500 mb-1">Order #{order.id.slice(-6).toUpperCase()}</p>

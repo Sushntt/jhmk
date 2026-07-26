@@ -73,7 +73,7 @@ export default function ProfilePage() {
       </Reveal>
 
       <Reveal delay={0.1}>
-        <div className="bg-white rounded-lg border border-brand-200 p-8">
+        <div className="bg-surface rounded-lg border border-brand-200 p-8">
           <div className="flex items-center gap-4 pb-6 mb-6 border-b border-brand-100">
             <div className="relative w-16 h-16 rounded-full overflow-hidden bg-brand-100 flex-shrink-0">
               {user.photoURL ? (

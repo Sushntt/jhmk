@@ -41,7 +41,7 @@ export default function FAQPage() {
             placeholder="Search questions..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-4 bg-white border border-brand-200 rounded-lg focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-colors"
+            className="w-full pl-12 pr-4 py-4 bg-surface border border-brand-200 rounded-lg focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition-colors"
           />
         </div>
       </Reveal>
@@ -61,7 +61,7 @@ export default function FAQPage() {
 
                 return (
                   <Reveal key={globalIndex} delay={index * 0.05}>
-                    <div className="bg-white rounded-lg border border-brand-200 overflow-hidden">
+                    <div className="bg-surface rounded-lg border border-brand-200 overflow-hidden">
                       <button
                         onClick={() => setOpenIndex(isOpen ? null : globalIndex)}
                         className="w-full flex items-center justify-between p-5 text-left hover:bg-brand-50 transition-colors"

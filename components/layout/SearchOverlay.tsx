@@ -85,7 +85,7 @@ export function SearchOverlay({ isOpen, onClose }: { isOpen: boolean; onClose: (
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-            className="fixed top-9 left-0 right-0 z-50 bg-white shadow-2xl"
+            className="fixed top-9 left-0 right-0 z-50 bg-surface shadow-2xl"
           >
             <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-8">
               <form onSubmit={handleSubmit} className="flex items-center gap-3">

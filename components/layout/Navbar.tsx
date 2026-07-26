@@ -64,7 +64,7 @@ export function Navbar() {
         className={cn(
           "fixed top-9 left-0 right-0 z-50 transition-[background-color,box-shadow,padding] duration-300 ease-out",
           isScrolled || !isHome
-            ? "bg-white/95 backdrop-blur-md shadow-sm"
+            ? "bg-surface/95 backdrop-blur-md shadow-sm"
             : "bg-transparent"
         )}
       >
@@ -158,7 +158,7 @@ export function Navbar() {
                     "hidden md:flex items-center gap-2 text-sm tracking-wider uppercase px-4 py-2 rounded-full transition-colors duration-200",
                     isScrolled || !isHome
                       ? "text-brand-900 border border-brand-900 hover:bg-brand-900 hover:text-white"
-                      : "text-white border border-white/50 hover:bg-white/10"
+                      : "text-white border border-white/50 hover:bg-surface/10"
                   )}
                 >
                   <User className="w-4 h-4" />
@@ -193,7 +193,7 @@ export function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-40 bg-white pt-32 px-6"
+            className="fixed inset-0 z-40 bg-surface pt-32 px-6"
           >
             <nav className="flex flex-col gap-6">
               {navLinks.map((link, i) => (

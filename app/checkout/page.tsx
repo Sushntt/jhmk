@@ -135,7 +135,7 @@ export default function CheckoutPage() {
         {/* Order Summary */}
         <div className="lg:col-span-2 lg:order-2">
           <Reveal delay={0.1}>
-            <div className="bg-white border border-brand-100 rounded-lg p-6 sticky top-32">
+            <div className="bg-surface border border-brand-100 rounded-lg p-6 sticky top-32">
               <h2 className="text-lg font-serif text-brand-900 mb-6">Order Summary</h2>
               <div className="space-y-4 max-h-80 overflow-y-auto pr-1">
                 {items.map((item) => (
@@ -200,12 +200,12 @@ export default function CheckoutPage() {
         {/* Login + Details */}
         <div className="lg:col-span-3 lg:order-1">
           {isLoading ? (
-            <div className="bg-white border border-brand-100 rounded-lg p-10 text-center">
+            <div className="bg-surface border border-brand-100 rounded-lg p-10 text-center">
               <p className="text-brand-400 text-sm">Loading…</p>
             </div>
           ) : !user ? (
             <Reveal>
-              <div className="bg-white border border-brand-100 rounded-lg p-10 text-center">
+              <div className="bg-surface border border-brand-100 rounded-lg p-10 text-center">
                 <User className="w-12 h-12 text-gold-500 mx-auto mb-4" />
                 <h2 className="text-2xl font-serif text-brand-900 mb-2">Sign in to continue</h2>
                 <p className="text-brand-500 mb-8 max-w-sm mx-auto">
@@ -222,7 +222,7 @@ export default function CheckoutPage() {
             </Reveal>
           ) : (
             <Reveal>
-              <div className="bg-white border border-brand-100 rounded-lg p-8">
+              <div className="bg-surface border border-brand-100 rounded-lg p-8">
                 <div className="flex items-center gap-3 mb-8 pb-6 border-b border-brand-100">
                   {user.photoURL ? (
                     <img src={user.photoURL} alt={user.name} className="w-10 h-10 rounded-full" />

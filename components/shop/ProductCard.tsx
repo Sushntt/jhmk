@@ -43,7 +43,7 @@ export function ProductCard({ product }: { product: Product }) {
               </span>
             )}
             {product.newArrival && (
-              <span className="px-2 py-1 bg-white/90 text-xs tracking-wider uppercase text-brand-900">
+              <span className="px-2 py-1 bg-surface/90 text-xs tracking-wider uppercase text-brand-900">
                 New
               </span>
             )}
@@ -64,7 +64,7 @@ export function ProductCard({ product }: { product: Product }) {
                 if (product.inStock) addToCart(product)
               }}
               disabled={!product.inStock}
-              className="flex-1 flex items-center justify-center gap-2 py-3 bg-white text-brand-900 text-sm font-medium rounded-md hover:bg-brand-900 hover:text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-brand-900"
+              className="flex-1 flex items-center justify-center gap-2 py-3 bg-surface text-brand-900 text-sm font-medium rounded-md hover:bg-brand-900 hover:text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-surface disabled:hover:text-brand-900"
             >
               <ShoppingBag className="w-4 h-4" />
               {product.inStock ? "Add to Bag" : "Sold Out"}

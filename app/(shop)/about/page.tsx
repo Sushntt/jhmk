@@ -89,7 +89,7 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {collections.map((c, i) => (
             <Reveal key={c.name} delay={i * 0.1}>
-              <div className="text-center p-8 bg-white rounded-lg border border-brand-100 h-full">
+              <div className="text-center p-8 bg-surface rounded-lg border border-brand-100 h-full">
                 <h3 className="text-xl font-serif text-brand-900 mb-3">{c.name}</h3>
                 <p className="text-sm text-brand-600 leading-relaxed">{c.description}</p>
               </div>

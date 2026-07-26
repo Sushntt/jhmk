@@ -88,7 +88,7 @@ export function Hero() {
             transition={{ duration: 0.7, delay: 0.75, ease }}
             className="flex flex-col sm:flex-row gap-3 sm:gap-4"
           >
-            <Button asChild size="lg" className="bg-white text-brand-900 hover:bg-gold-100">
+            <Button asChild size="lg" className="bg-surface text-brand-900 hover:bg-gold-100">
               <Link href="/shop">
                 Explore Collection
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -98,7 +98,7 @@ export function Hero() {
               asChild
               size="lg"
               variant="outline"
-              className="border-white/30 text-white hover:bg-white/10 hover:border-white"
+              className="border-white/30 text-white hover:bg-surface/10 hover:border-white"
             >
               <Link href="/about">Our Story</Link>
             </Button>

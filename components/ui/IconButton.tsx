@@ -31,7 +31,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
         className={cn(
           "relative p-2 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2",
           variant === "default" && "hover:bg-brand-100 text-brand-900",
-          variant === "ghost" && "hover:bg-white/10 text-white",
+          variant === "ghost" && "hover:bg-surface/10 text-white",
           className
         )}
         whileHover={{ scale: 1.1 }}

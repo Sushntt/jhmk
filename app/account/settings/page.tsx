@@ -81,7 +81,7 @@ export default function SettingsPage() {
 
       {/* Notification Preferences */}
       <Reveal delay={0.1}>
-        <div className="bg-white rounded-lg border border-brand-200 p-8 mb-6">
+        <div className="bg-surface rounded-lg border border-brand-200 p-8 mb-6">
           <h2 className="text-lg font-serif text-brand-900 mb-1">Notifications</h2>
           <p className="text-sm text-brand-500 mb-6">Choose what you'd like to hear about.</p>
 
@@ -105,7 +105,7 @@ export default function SettingsPage() {
                   }`}
                 >
                   <span
-                    className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                    className={`absolute top-0.5 left-0.5 w-5 h-5 bg-surface rounded-full shadow transition-transform ${
                       prefs[key] ? "translate-x-5" : "translate-x-0"
                     }`}
                   />
@@ -129,7 +129,7 @@ export default function SettingsPage() {
 
       {/* Saved Address */}
       <Reveal delay={0.15}>
-        <div className="bg-white rounded-lg border border-brand-200 p-8 mb-6">
+        <div className="bg-surface rounded-lg border border-brand-200 p-8 mb-6">
           <h2 className="text-lg font-serif text-brand-900 mb-1">Delivery Address</h2>
           <p className="text-sm text-brand-500 mb-6">Used to pre-fill your details at checkout.</p>
 
@@ -160,7 +160,7 @@ export default function SettingsPage() {
 
       {/* Account */}
       <Reveal delay={0.2}>
-        <div className="bg-white rounded-lg border border-brand-200 p-8">
+        <div className="bg-surface rounded-lg border border-brand-200 p-8">
           <h2 className="text-lg font-serif text-brand-900 mb-1">Account</h2>
           <p className="text-sm text-brand-500 mb-6">Signed in as {user.email}</p>
           <Button variant="outline" onClick={handleSignOut} className="w-full">

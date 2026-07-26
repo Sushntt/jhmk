@@ -107,12 +107,13 @@ function computeAnalytics(allOrders: AirtableOrderRecord[]) {
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(-30)
 
-  // Recent orders deliberately includes PENDING ones - those are the orders the
-  // client still needs to act on, so hiding them would defeat the point.
+  // Recent orders shows EVERY order - pending, confirmed and cancelled. The
+  // figures above exclude pending and cancelled, but this list is the client's
+  // working view of what has come in, so nothing is hidden from it.
   // Sorted on ISO createdTime because "Created At" is a readable string.
-  const recentOrders = [...active]
+  const recentOrders = [...allOrders]
     .sort((a, b) => b.createdTime.localeCompare(a.createdTime))
-    .slice(0, 8)
+    .slice(0, 10)
 
   return {
     revenue: totalRevenue,
