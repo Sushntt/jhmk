@@ -52,6 +52,7 @@ export interface AirtableOrderRecord {
   total: number
   status: string
   createdAt: string
+  createdTime: string
 }
 
 async function airtableRequest(path: string, init?: RequestInit) {
@@ -73,14 +74,71 @@ async function airtableRequest(path: string, init?: RequestInit) {
   return res.json()
 }
 
+// Orders written before the readable format was introduced stored raw JSON.
+// We still parse that, so existing rows keep working, but new orders are
+// written as plain readable lines the client can actually scan in Airtable:
+//   Kiran Threader Earrings  x1  -  Rs 2,600
 function parseItems(raw: string | undefined): AirtableOrderRecord["items"] {
   if (!raw) return []
-  try {
-    const parsed = JSON.parse(raw)
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
+
+  // Legacy JSON format
+  const trimmed = raw.trim()
+  if (trimmed.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(trimmed)
+      if (Array.isArray(parsed)) return parsed
+    } catch {
+      // fall through to text parsing
+    }
   }
+
+  // Readable format
+  const items: AirtableOrderRecord["items"] = []
+  for (const line of trimmed.split("\n")) {
+    const text = line.trim()
+    if (!text) continue
+
+    // "Name  x2  -  Rs 2,600"  (the amount shown is the LINE TOTAL, so divide
+    // by quantity to recover the unit price the rest of the app expects)
+    const match = text.match(/^(.*?)\s+x(\d+)\s+-\s+Rs\s*([\d,]+)/i)
+    if (match) {
+      const quantity = parseInt(match[2], 10) || 1
+      const lineTotal = parseInt(match[3].replace(/,/g, ""), 10) || 0
+      items.push({
+        name: match[1].trim(),
+        quantity,
+        price: Math.round(lineTotal / quantity),
+      })
+    } else {
+      // Unrecognised line - keep the text rather than dropping the item
+      items.push({ name: text, quantity: 1, price: 0 })
+    }
+  }
+  return items
+}
+
+// Renders order items as readable lines for the Airtable "Items" column.
+function formatItemsForAirtable(
+  items: { name: string; quantity: number; price: number }[]
+): string {
+  return items
+    .map((i) => `${i.name}  x${i.quantity}  -  Rs ${(i.price * i.quantity).toLocaleString("en-IN")}`)
+    .join("\n")
+}
+
+// Readable IST timestamp for the Airtable "Created At" column, e.g.
+// "26 Jul 2026, 01:31 AM". Sorting never relies on this string - Airtable's
+// own record createdTime is used for that.
+function formatDateForAirtable(date: Date): string {
+  return date.toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "Asia/Kolkata",
+  })
 }
 
 function mapProduct(rec: any): Product {
@@ -187,6 +245,9 @@ export async function getOrders(): Promise<AirtableOrderRecord[]> {
         total: rec.fields["Total"] || 0,
         status: rec.fields["Status"] || "pending",
         createdAt: rec.fields["Created At"] || rec.createdTime,
+        // Airtable always supplies createdTime as ISO - used for sorting so a
+        // human-readable "Created At" string can never break date ordering.
+        createdTime: rec.createdTime,
       })
     }
 
@@ -221,10 +282,10 @@ export async function createOrder(order: {
           Email: order.email || "",
           Phone: order.phone,
           Address: order.address || "",
-          Items: JSON.stringify(order.items),
+          Items: formatItemsForAirtable(order.items),
           Total: order.total,
           Status: "pending",
-          "Created At": new Date().toISOString(),
+          "Created At": formatDateForAirtable(new Date()),
         },
       }),
     })
@@ -262,10 +323,10 @@ export async function createTestOrderRecord(): Promise<string> {
         Email: "test@example.com",
         Phone: "0000000000",
         Address: "Test address",
-        Items: JSON.stringify([{ name: "Test item", quantity: 1, price: 0 }]),
+        Items: formatItemsForAirtable([{ name: "Test item", quantity: 1, price: 0 }]),
         Total: 0,
         Status: "pending",
-        "Created At": new Date().toISOString(),
+        "Created At": formatDateForAirtable(new Date()),
       },
     }),
   })

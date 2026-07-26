@@ -34,7 +34,7 @@ function computeAnalytics(orders: AirtableOrderRecord[]) {
     if (existing) {
       existing.orders += 1
       existing.totalSpent += order.total
-      if (order.createdAt < existing.firstOrderAt) existing.firstOrderAt = order.createdAt
+      if (order.createdTime < existing.firstOrderAt) existing.firstOrderAt = order.createdTime
       // Backfill contact details from whichever order happens to carry them
       if (!existing.email && email) existing.email = email
       if (!existing.phone && order.phone) existing.phone = order.phone
@@ -45,7 +45,7 @@ function computeAnalytics(orders: AirtableOrderRecord[]) {
         phone: order.phone,
         orders: 1,
         totalSpent: order.total,
-        firstOrderAt: order.createdAt,
+        firstOrderAt: order.createdTime,
       })
     }
   }
@@ -74,7 +74,7 @@ function computeAnalytics(orders: AirtableOrderRecord[]) {
   // Revenue trend by day
   const trendMap = new Map<string, { revenue: number; orders: number }>()
   for (const order of orders) {
-    const date = order.createdAt.slice(0, 10)
+    const date = order.createdTime.slice(0, 10)
     const existing = trendMap.get(date)
     if (existing) {
       existing.revenue += order.total
@@ -126,6 +126,7 @@ export async function GET() {
     total: o.total,
     status: o.status,
     createdAt: o.createdAt,
+    createdTime: o.createdAt,
   }))
 
   return NextResponse.json({ source: "demo", data: computeAnalytics(demoOrders) })

@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js build output
+.next/
+out/
+build/
+dist/
+
+# Environment variables - NEVER commit these.
+# They contain the Airtable API key and the admin password.
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+# .env.example is intentionally NOT ignored - it documents the variable names
+# without containing any real values.
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Testing
+coverage/

@@ -3,9 +3,11 @@ import type { NextRequest } from "next/server"
 
 // Protects the analytics dashboard with HTTP Basic Auth.
 //
-// IMPORTANT: this guards BOTH /admin and /api/analytics. Guarding only the page
-// would be theatre - the raw revenue, customer names and phone numbers are
-// served by the API route, so anyone could just request that directly.
+// IMPORTANT: this guards /admin, /api/analytics AND /api/debug-airtable.
+// Guarding only the page would be theatre - the raw revenue, customer names and
+// phone numbers are served by the API route, so anyone could just request that
+// directly. The debug route is included because it exposes product data and can
+// write a test row to Airtable.
 //
 // Set these in Vercel -> Settings -> Environment Variables:
 //   ADMIN_USER      e.g. chinkara
@@ -15,7 +17,7 @@ import type { NextRequest } from "next/server"
 // never reach the browser bundle.
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/analytics/:path*"],
+  matcher: ["/admin/:path*", "/api/analytics/:path*", "/api/debug-airtable/:path*"],
 }
 
 function unauthorized(message = "Authentication required") {

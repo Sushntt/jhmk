@@ -63,7 +63,7 @@ function RevenueTrendChart({ data }: { data: { date: string; revenue: number; or
 
   return (
     <div>
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" preserveAspectRatio="none">
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label="Revenue over time">
         {[0.25, 0.5, 0.75].map((f) => (
           <line
             key={f}
@@ -91,6 +91,17 @@ function RevenueTrendChart({ data }: { data: { date: string; revenue: number; or
               vectorEffect="non-scaling-stroke"
             />
           </>
+        )}
+
+        {maxRevenue > 0 && (
+          <text
+            x={PAD.left + 4}
+            y={PAD.top + 12}
+            className="fill-brand-400"
+            style={{ fontSize: 11 }}
+          >
+            {`Peak ${formatPrice(maxRevenue)}`}
+          </text>
         )}
 
         {data.map((d, i) => (

@@ -34,7 +34,9 @@ export async function GET(request: Request) {
       return false
     })
 
-    mine.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    // Sort on Airtable's ISO createdTime - "Created At" is now a human-readable
+    // string and would not sort correctly as a date.
+    mine.sort((a, b) => new Date(b.createdTime).getTime() - new Date(a.createdTime).getTime())
 
     return NextResponse.json({ orders: mine })
   } catch (err: any) {

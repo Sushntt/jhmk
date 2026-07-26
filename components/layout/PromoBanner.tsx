@@ -1,9 +1,13 @@
 "use client"
 
+// Keep these consistent with the Shipping Policy page and the live coupon
+// code in the checkout. "Free shipping" was removed because shipping is
+// charged at ₹75 (Tamil Nadu) / ₹90 (rest of India) with no free threshold.
 const offers = [
-  "Free shipping on orders above ₹999",
-  "Flat 10% off on your first order — checkout via WhatsApp",
+  "Pan-India delivery — dispatched in 1–3 business days",
+  "Use code CHINKARA10 for 10% off — confirmed on WhatsApp",
   "New arrivals dropping every week",
+  "Premium imitation jewellery, hand-picked across India",
 ]
 
 export function PromoBanner() {

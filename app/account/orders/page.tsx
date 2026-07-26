@@ -16,7 +16,47 @@ interface OrderRecord {
   address: string
   items: { productId?: string; name: string; quantity: number; price: number }[]
   total: number
+  status: string
   createdAt: string
+  createdTime: string
+}
+
+// Status is controlled entirely from the Status column in the Airtable Orders
+// table - changing it there updates what the customer sees here. Keys are
+// lowercased on lookup so "Pending", "pending" and "PENDING" all match.
+const STATUS_STYLES: Record<string, { label: string; className: string }> = {
+  pending: { label: "Pending", className: "text-yellow-700 bg-yellow-50 border-yellow-200" },
+  confirmed: { label: "Confirmed", className: "text-blue-700 bg-blue-50 border-blue-200" },
+  shipped: { label: "Shipped", className: "text-purple-700 bg-purple-50 border-purple-200" },
+  delivered: { label: "Delivered", className: "text-green-700 bg-green-50 border-green-200" },
+  cancelled: { label: "Cancelled", className: "text-red-700 bg-red-50 border-red-200" },
+}
+
+// "Created At" is written as a readable IST string for the client's benefit.
+// Legacy rows still hold an ISO timestamp, so those get formatted instead of
+// being shown raw.
+function displayDate(order: { createdAt: string; createdTime: string }): string {
+  const raw = order.createdAt || order.createdTime
+  const looksISO = /^\d{4}-\d{2}-\d{2}T/.test(raw)
+  return looksISO ? formatDate(raw) : raw
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const key = (status || "pending").trim().toLowerCase()
+  // Unknown values still render rather than disappearing, so a typo in Airtable
+  // is visible instead of silently showing nothing.
+  const style = STATUS_STYLES[key] || {
+    label: status || "Pending",
+    className: "text-brand-600 bg-brand-50 border-brand-200",
+  }
+
+  return (
+    <span
+      className={`inline-flex items-center px-3 py-1 rounded-full border text-xs font-medium ${style.className}`}
+    >
+      {style.label}
+    </span>
+  )
 }
 
 export default function OrdersPage() {
@@ -83,9 +123,12 @@ export default function OrdersPage() {
           orders.map((order, i) => (
             <Reveal key={order.id} delay={i * 0.1}>
               <div className="bg-white rounded-lg border border-brand-200 overflow-hidden">
-                <div className="p-6 border-b border-brand-100">
-                  <p className="text-sm text-brand-500 mb-1">Order #{order.id.slice(-6).toUpperCase()}</p>
-                  <p className="text-xs text-brand-400">{formatDate(order.createdAt)}</p>
+                <div className="p-6 border-b border-brand-100 flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm text-brand-500 mb-1">Order #{order.id.slice(-6).toUpperCase()}</p>
+                    <p className="text-xs text-brand-400">{displayDate(order)}</p>
+                  </div>
+                  <StatusBadge status={order.status} />
                 </div>
                 <div className="p-6">
                   <div className="space-y-3">
