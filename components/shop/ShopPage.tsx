@@ -91,7 +91,7 @@ export function ShopPage({ products }: { products: Product[] }) {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 text-sm tracking-wide transition-all rounded-full ${
+              className={`px-4 py-2 text-sm tracking-wide transition-colors duration-200 rounded-full ${
                 selectedCategory === cat
                   ? "bg-brand-900 text-white"
                   : "bg-brand-100 text-brand-700 hover:bg-brand-200"

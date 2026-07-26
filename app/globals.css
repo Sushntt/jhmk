@@ -24,3 +24,38 @@
     display: none;
   }
 }
+
+/* Reduced motion
+   ------------------------------------------------------------------
+   Some people get genuinely nauseous from interface movement, and both
+   iOS and Windows expose a system setting for it. We keep opacity and
+   colour transitions (so the UI still reads as responsive) but drop
+   transforms and looping motion, rather than disabling everything. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.12s !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Looping/ambient motion has no informational value - stop it outright. */
+  .animate-marquee {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* Hover motion is gated so a tap on touch devices doesn't fire a stuck
+   hover state. Applies to the lift on product cards. */
+@media (hover: none), (pointer: coarse) {
+  .hover-lift:hover {
+    transform: none !important;
+  }
+}

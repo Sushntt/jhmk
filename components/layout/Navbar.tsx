@@ -28,10 +28,25 @@ export function Navbar() {
   const { items: wishlistItems, setIsOpen: setWishlistOpen } = useWishlist()
   const { user, signIn, signOut } = useAuth()
 
+  // A scroll listener fires on every scroll frame and re-renders the navbar
+  // each time. IntersectionObserver does the same job off the main thread and
+  // only fires when the threshold is actually crossed.
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50)
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
+    const sentinel = document.createElement("div")
+    sentinel.setAttribute("aria-hidden", "true")
+    sentinel.style.cssText = "position:absolute;top:0;left:0;height:50px;width:1px;pointer-events:none;"
+    document.body.prepend(sentinel)
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsScrolled(!entry.isIntersecting),
+      { threshold: 0 }
+    )
+    observer.observe(sentinel)
+
+    return () => {
+      observer.disconnect()
+      sentinel.remove()
+    }
   }, [])
 
   useEffect(() => {
@@ -47,7 +62,7 @@ export function Navbar() {
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
         className={cn(
-          "fixed top-9 left-0 right-0 z-50 transition-all duration-500",
+          "fixed top-9 left-0 right-0 z-50 transition-[background-color,box-shadow,padding] duration-300 ease-out",
           isScrolled || !isHome
             ? "bg-white/95 backdrop-blur-md shadow-sm"
             : "bg-transparent"
@@ -80,7 +95,7 @@ export function Navbar() {
                   )}
                 >
                   {link.label}
-                  <span className="absolute -bottom-1 left-0 w-0 h-px bg-current transition-all duration-300 group-hover:w-full" />
+                  <span className="absolute -bottom-1 left-0 w-0 h-px bg-current transition-[width] duration-300 ease-out group-hover:w-full" />
                 </Link>
               ))}
             </nav>
@@ -140,7 +155,7 @@ export function Navbar() {
                 <button
                   onClick={signIn}
                   className={cn(
-                    "hidden md:flex items-center gap-2 text-sm tracking-wider uppercase px-4 py-2 rounded-full transition-all",
+                    "hidden md:flex items-center gap-2 text-sm tracking-wider uppercase px-4 py-2 rounded-full transition-colors duration-200",
                     isScrolled || !isHome
                       ? "text-brand-900 border border-brand-900 hover:bg-brand-900 hover:text-white"
                       : "text-white border border-white/50 hover:bg-white/10"

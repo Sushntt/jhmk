@@ -54,7 +54,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: 0.3, ease }}
-            className="font-serif leading-[0.95] tracking-tight mb-7 text-[3rem] sm:text-6xl xl:text-7xl"
+            className="font-serif leading-[1.1] tracking-tight mb-7 pb-1 text-[3rem] sm:text-6xl xl:text-7xl"
           >
             Grace in
             <br />
@@ -67,11 +67,14 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 0.5, ease }}
             className="flex items-start gap-4 mb-9"
           >
+            {/* scaleX rather than animating width - width is a layout property
+                and forces reflow on every frame; scaleX runs on the GPU. */}
             <motion.span
-              initial={{ width: 0 }}
-              animate={{ width: "2.5rem" }}
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
               transition={{ duration: 0.9, delay: 0.6, ease }}
-              className="h-px bg-gold-400 flex-shrink-0 mt-3"
+              style={{ transformOrigin: "left" }}
+              className="h-px w-10 bg-gold-400 flex-shrink-0 mt-3"
             />
             <p className="text-sm sm:text-base text-brand-300 leading-relaxed">
               Named for the Indian gazelle. Hand-picked pieces from makers across India,

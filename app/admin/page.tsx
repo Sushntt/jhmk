@@ -33,7 +33,7 @@ function MiniBar({ value, max, color = "bg-gold-500" }: { value: number; max: nu
   const pct = Math.max(5, (value / max) * 100)
   return (
     <div className="h-2 bg-brand-100 rounded-full overflow-hidden">
-      <div className={`h-full ${color} rounded-full transition-all duration-1000`} style={{ width: `${pct}%` }} />
+      <div className={`h-full ${color} rounded-full transition-[width] duration-700 ease-out`} style={{ width: `${pct}%` }} />
     </div>
   )
 }

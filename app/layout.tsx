@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Inter, Playfair_Display } from "next/font/google"
+import { Cormorant_Garamond, Karla } from "next/font/google"
 import "./globals.css"
 import { Navbar } from "@/components/layout/Navbar"
 import { PromoBanner } from "@/components/layout/PromoBanner"
@@ -9,9 +9,26 @@ import { WishlistDrawer } from "@/components/layout/WishlistDrawer"
 import { CartProvider } from "@/hooks/useCart"
 import { WishlistProvider } from "@/hooks/useWishlist"
 import { AuthProvider } from "@/hooks/useAuth"
+import { MotionProvider } from "@/components/providers/MotionProvider"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
-const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" })
+// Display: Cormorant Garamond - high-contrast old-style serif. The thick/thin
+// stroke modulation echoes fine metalwork, which suits a jewellery brand far
+// better than Georgia (a screen-reading workhorse) did.
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-display",
+  display: "swap",
+})
+
+// Body: Karla - a grotesque with slightly quirky letterforms. Chosen over Inter,
+// which is on every AI-generated site and reads as a default rather than a choice.
+const karla = Karla({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-body",
+  display: "swap",
+})
 
 export const metadata: Metadata = {
   title: "Chinkara | Premium Imitation Jewellery & Fashion",
@@ -20,8 +37,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
+    <html lang="en" className={`${cormorant.variable} ${karla.variable}`}>
       <body className="font-sans antialiased bg-brand-50 text-brand-900">
+        <MotionProvider>
         <AuthProvider>
           <CartProvider>
             <WishlistProvider>
@@ -34,6 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </WishlistProvider>
           </CartProvider>
         </AuthProvider>
+        </MotionProvider>
       </body>
     </html>
   )

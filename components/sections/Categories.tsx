@@ -15,7 +15,6 @@ export function Categories() {
   return (
     <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       <Reveal className="text-center mb-16">
-        <p className="text-sm tracking-[0.3em] uppercase text-gold-600 mb-4">Browse By</p>
         <h2 className="text-3xl md:text-4xl font-serif text-brand-900">Categories</h2>
       </Reveal>
       <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

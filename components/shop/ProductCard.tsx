@@ -55,7 +55,7 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
 
           {/* Quick Actions */}
-          <div className="absolute bottom-4 left-4 right-4 flex gap-2 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+          <div className="absolute bottom-4 left-4 right-4 flex gap-2 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-[opacity,transform] duration-200 ease-out">
             <motion.button
               whileHover={product.inStock ? { scale: 1.05 } : undefined}
               whileTap={product.inStock ? { scale: 0.95 } : undefined}

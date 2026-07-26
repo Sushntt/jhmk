@@ -29,7 +29,6 @@ export function Collections() {
     <section className="py-20 px-4 sm:px-6 lg:px-8 bg-brand-900 text-white overflow-hidden">
       <div className="max-w-6xl mx-auto">
         <Reveal className="text-center mb-14">
-          <p className="text-xs tracking-[0.35em] uppercase text-gold-300 mb-4">Three Moods</p>
           <h2 className="text-3xl md:text-4xl font-serif mb-4">Find your register</h2>
           <p className="text-brand-300 text-sm max-w-md mx-auto">
             Every piece we carry belongs to one of three moods. Start with the one that sounds
@@ -48,7 +47,7 @@ export function Collections() {
                 >
                   {/* The rule grows on hover - a small, quiet signal rather than a
                       card that lifts off the page. */}
-                  <span className="block h-px w-10 bg-gold-500 mb-6 transition-all duration-500 group-hover:w-20" />
+                  <span className="block h-px w-10 bg-gold-500 mb-6 transition-[width] duration-300 ease-out group-hover:w-20" />
 
                   <h3 className="text-2xl font-serif mb-3 group-hover:text-gold-300 transition-colors duration-300">
                     {c.name}

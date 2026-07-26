@@ -36,8 +36,11 @@ const config: Config = {
         },
       },
       fontFamily: {
-        serif: ["Georgia", "Cambria", "Times New Roman", "Times", "serif"],
-        sans: ["Inter", "system-ui", "sans-serif"],
+        // Wired to the next/font CSS variables set in app/layout.tsx.
+        // Previously `serif` was Georgia while Playfair was downloaded and never
+        // used - the font was costing bandwidth on every page load for nothing.
+        serif: ["var(--font-display)", "Cormorant Garamond", "Georgia", "serif"],
+        sans: ["var(--font-body)", "Karla", "system-ui", "sans-serif"],
       },
       animation: {
         "fade-in": "fadeIn 0.6s ease-out forwards",
