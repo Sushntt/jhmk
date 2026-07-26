@@ -17,6 +17,9 @@ interface CustomerSummary {
 interface AnalyticsPayload {
   revenue: number
   orders: number
+  pendingOrders: number
+  pendingRevenue: number
+  cancelledOrders: number
   customers: number
   repeatCustomers: number
   avgOrderValue: number
@@ -186,8 +189,8 @@ export default function AdminDashboard() {
       {/* Sales KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {[
-          { label: "Total Revenue", value: formatPrice(data.revenue), icon: DollarSign },
-          { label: "Orders", value: data.orders.toString(), icon: ShoppingBag },
+          { label: "Confirmed Revenue", value: formatPrice(data.revenue), icon: DollarSign },
+          { label: "Confirmed Orders", value: data.orders.toString(), icon: ShoppingBag },
           { label: "Customers", value: data.customers.toString(), icon: Users },
           { label: "Avg Order Value", value: formatPrice(data.avgOrderValue), icon: TrendingUp },
         ].map((kpi) => (
@@ -202,6 +205,31 @@ export default function AdminDashboard() {
           </Reveal>
         ))}
       </div>
+
+      {/* Pending orders need action - a row is written the moment a customer
+          reaches WhatsApp, so these are enquiries, not confirmed sales. */}
+      {data.pendingOrders > 0 && (
+        <Reveal className="mb-8">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-5 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-yellow-900">
+                {data.pendingOrders} order{data.pendingOrders > 1 ? "s" : ""} awaiting confirmation
+                {" · "}
+                {formatPrice(data.pendingRevenue)}
+              </p>
+              <p className="text-xs text-yellow-800 mt-1">
+                Not counted in the figures above. Set Status to <strong>confirmed</strong> in
+                Airtable once payment is received.
+              </p>
+            </div>
+            {data.cancelledOrders > 0 && (
+              <span className="text-xs text-yellow-700">
+                {data.cancelledOrders} cancelled (excluded)
+              </span>
+            )}
+          </div>
+        </Reveal>
+      )}
 
       {/* Revenue Trend */}
       <Reveal className="mb-12">

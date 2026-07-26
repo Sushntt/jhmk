@@ -13,10 +13,29 @@ interface CustomerSummary {
   firstOrderAt: string
 }
 
-function computeAnalytics(orders: AirtableOrderRecord[]) {
+// A row is written to Airtable the moment a customer clicks through to
+// WhatsApp - before any payment is taken. Counting those as sales would show
+// the client revenue they have not received, so "pending" is reported
+// separately and "cancelled" is excluded from the figures entirely.
+const CONFIRMED_STATUSES = ["confirmed", "shipped", "delivered"]
+
+function statusOf(o: AirtableOrderRecord) {
+  return (o.status || "pending").trim().toLowerCase()
+}
+
+function computeAnalytics(allOrders: AirtableOrderRecord[]) {
+  const active = allOrders.filter((o) => statusOf(o) !== "cancelled")
+  const pending = active.filter((o) => !CONFIRMED_STATUSES.includes(statusOf(o)))
+  // Confirmed sales drive every headline number below.
+  const orders = active.filter((o) => CONFIRMED_STATUSES.includes(statusOf(o)))
+
   const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0)
   const totalOrders = orders.length
   const avgOrderValue = totalOrders ? totalRevenue / totalOrders : 0
+
+  const pendingOrders = pending.length
+  const pendingRevenue = pending.reduce((sum, o) => sum + o.total, 0)
+  const cancelledOrders = allOrders.length - active.length
 
   // Customers grouped by a stable identity key. Email (from Google sign-in) is
   // preferred; phone is normalised to its last 10 digits first, otherwise
@@ -88,9 +107,12 @@ function computeAnalytics(orders: AirtableOrderRecord[]) {
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(-30)
 
-  const recentOrders = [...orders]
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    .slice(0, 5)
+  // Recent orders deliberately includes PENDING ones - those are the orders the
+  // client still needs to act on, so hiding them would defeat the point.
+  // Sorted on ISO createdTime because "Created At" is a readable string.
+  const recentOrders = [...active]
+    .sort((a, b) => b.createdTime.localeCompare(a.createdTime))
+    .slice(0, 8)
 
   return {
     revenue: totalRevenue,
