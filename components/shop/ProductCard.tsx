@@ -4,16 +4,18 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
-import { Heart, ShoppingBag } from "lucide-react"
+import { Heart, ShoppingBag, Eye } from "lucide-react"
 import { Product } from "@/types"
 import { formatPrice } from "@/lib/utils"
 import { useCart } from "@/hooks/useCart"
 import { useWishlist } from "@/hooks/useWishlist"
+import { QuickView } from "./QuickView"
 
 export function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart()
   const { toggleWishlist, isInWishlist } = useWishlist()
   const [imgSrc, setImgSrc] = useState(product.images[0] || "/images/product-1.jpg")
+  const [quickViewOpen, setQuickViewOpen] = useState(false)
 
   return (
     <motion.div
@@ -69,6 +71,19 @@ export function ProductCard({ product }: { product: Product }) {
               <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
               <span className="truncate">{product.inStock ? "Add to Bag" : "Sold Out"}</span>
             </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={(e) => {
+                e.preventDefault()
+                setQuickViewOpen(true)
+              }}
+              aria-label={`Quick view ${product.name}`}
+              className="flex-shrink-0 grid place-items-center w-10 sm:w-11 bg-surface text-brand-900 rounded-md hover:bg-brand-900 hover:text-white transition-colors"
+            >
+              <Eye className="w-4 h-4" />
+            </motion.button>
           </div>
         </div>
       </Link>
@@ -98,10 +113,12 @@ export function ProductCard({ product }: { product: Product }) {
           className="p-2 hover:bg-brand-100 rounded-full transition-colors"
         >
           <Heart
-            className={`w-4 h-4 ${isInWishlist(product.id) ? "text-red-500 fill-red-500" : "text-brand-400"}`}
+            className={`w-4 h-4 ${isInWishlist(product.id) ? "text-spice-500 fill-spice-500" : "text-brand-400"}`}
           />
         </motion.button>
       </div>
+
+      {quickViewOpen && <QuickView product={product} onClose={() => setQuickViewOpen(false)} />}
     </motion.div>
   )
 }

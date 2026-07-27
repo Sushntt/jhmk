@@ -10,12 +10,14 @@ import { useCart } from "@/hooks/useCart"
 import { useWishlist } from "@/hooks/useWishlist"
 import { Reveal } from "@/components/animations/Reveal"
 import { Button } from "@/components/ui/Button"
-import { Heart, ShoppingBag, Minus, Plus, Check, ArrowLeft, Truck, Shield, MessageCircle } from "lucide-react"
+import { Heart, ShoppingBag, Minus, Plus, Check, ArrowLeft, Truck, Shield, MessageCircle, Maximize2 } from "lucide-react"
 import { ProductCard } from "./ProductCard"
 import { RecentlyViewed } from "./RecentlyViewed"
+import { ImageLightbox } from "./ImageLightbox"
 
 export function ProductDetail({ product, related }: { product: Product; related: Product[] }) {
   const [selectedImage, setSelectedImage] = useState(0)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const { addToCart, setIsOpen: setCartOpen } = useCart()
@@ -52,29 +54,43 @@ export function ProductDetail({ product, related }: { product: Product; related:
         {/* Images */}
         <Reveal direction="left">
           <div className="space-y-4">
-            <div className="relative aspect-square bg-brand-100 rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setLightboxOpen(true)}
+              aria-label="View larger image"
+              className="group relative block w-full aspect-square bg-brand-100 rounded-lg overflow-hidden cursor-zoom-in"
+            >
               <Image
                 src={product.images[selectedImage]}
                 alt={product.name}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover"
+                className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
                 priority
               />
-            </div>
-            <div className="flex gap-3">
-              {product.images.map((img, i) => (
-                <button
-                  key={i}
-                  onClick={() => setSelectedImage(i)}
-                  className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
-                    selectedImage === i ? "border-gold-500" : "border-transparent hover:border-brand-300"
-                  }`}
-                >
-                  <Image src={img} alt="" fill sizes="80px" className="object-cover" />
-                </button>
-              ))}
-            </div>
+              <span className="absolute bottom-3 right-3 grid place-items-center w-10 h-10 rounded-full bg-brand-950/45 text-white backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <Maximize2 className="w-4 h-4" />
+              </span>
+            </button>
+
+            {/* Thumbnails scroll horizontally - a product with six images would
+                otherwise wrap and push the buy button below the fold. */}
+            {product.images.length > 1 && (
+              <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
+                {product.images.map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedImage(i)}
+                    aria-label={`View image ${i + 1}`}
+                    className={`relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-colors ${
+                      selectedImage === i ? "border-gold-500" : "border-transparent hover:border-brand-300"
+                    }`}
+                  >
+                    <Image src={img} alt="" fill sizes="80px" className="object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </Reveal>
 
@@ -211,9 +227,9 @@ export function ProductDetail({ product, related }: { product: Product; related:
             <h2 className="text-2xl font-serif text-brand-900 mb-2">People Also Bought</h2>
             <p className="text-brand-500 text-sm">More from {product.category}</p>
           </Reveal>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+          <div className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-2">
             {related.map((p) => (
-              <div key={p.id}>
+              <div key={p.id} className="flex-shrink-0 w-[200px] sm:w-[240px]">
                 <ProductCard product={p} />
               </div>
             ))}
@@ -222,6 +238,16 @@ export function ProductDetail({ product, related }: { product: Product; related:
       )}
 
       <RecentlyViewed currentProductId={product.id} />
+
+      {lightboxOpen && (
+        <ImageLightbox
+          images={product.images}
+          index={selectedImage}
+          alt={product.name}
+          onClose={() => setLightboxOpen(false)}
+          onIndexChange={setSelectedImage}
+        />
+      )}
     </div>
   )
 }
