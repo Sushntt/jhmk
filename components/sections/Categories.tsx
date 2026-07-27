@@ -13,11 +13,11 @@ const categories = [
 
 export function Categories() {
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <Reveal className="text-center mb-16">
+    <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <Reveal className="text-center mb-10 sm:mb-16">
         <h2 className="text-3xl md:text-4xl font-serif text-brand-900">Categories</h2>
       </Reveal>
-      <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <StaggerContainer className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 lg:gap-6">
         {categories.map((cat) => (
           <StaggerItem key={cat.name}>
             <Link href={`/shop?category=${cat.name}`}>
@@ -32,8 +32,8 @@ export function Categories() {
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                <div className="absolute bottom-6 left-6 text-white">
-                  <h3 className="text-xl font-serif mb-1">{cat.name}</h3>
+                <div className="absolute bottom-3 left-3 sm:bottom-5 sm:left-5 text-white">
+                  <h3 className="text-sm sm:text-lg lg:text-xl font-serif">{cat.name}</h3>
                 </div>
               </motion.div>
             </Link>
