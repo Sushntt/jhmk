@@ -156,8 +156,8 @@ export function ShopPage({ products }: { products: Product[] }) {
         </div>
       ) : (
         <div
-          className={`grid gap-8 ${
-            viewMode === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"
+          className={`grid gap-4 sm:gap-6 lg:gap-8 ${
+            viewMode === "grid" ? "grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "grid-cols-1"
           }`}
         >
           {paginated.map((product) => (

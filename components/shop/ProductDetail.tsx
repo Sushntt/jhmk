@@ -211,7 +211,7 @@ export function ProductDetail({ product, related }: { product: Product; related:
             <h2 className="text-2xl font-serif text-brand-900 mb-2">People Also Bought</h2>
             <p className="text-brand-500 text-sm">More from {product.category}</p>
           </Reveal>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {related.map((p) => (
               <div key={p.id}>
                 <ProductCard product={p} />

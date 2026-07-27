@@ -119,7 +119,8 @@ export function CartDrawer() {
                             <motion.button
                               whileTap={{ scale: 0.9 }}
                               onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                              className="p-1 hover:bg-brand-100 rounded transition-colors"
+                              aria-label="Decrease quantity"
+                              className="p-3.5 -m-1 hover:bg-brand-100 rounded transition-colors"
                             >
                               <Minus className="w-4 h-4 text-brand-600" />
                             </motion.button>
@@ -129,7 +130,8 @@ export function CartDrawer() {
                             <motion.button
                               whileTap={{ scale: 0.9 }}
                               onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                              className="p-1 hover:bg-brand-100 rounded transition-colors"
+                              aria-label="Increase quantity"
+                              className="p-3.5 -m-1 hover:bg-brand-100 rounded transition-colors"
                             >
                               <Plus className="w-4 h-4 text-brand-600" />
                             </motion.button>
@@ -137,7 +139,8 @@ export function CartDrawer() {
                           <motion.button
                             whileTap={{ scale: 0.9 }}
                             onClick={() => removeFromCart(item.product.id)}
-                            className="p-1 hover:bg-red-50 rounded transition-colors"
+                            aria-label="Remove item"
+                            className="p-3.5 -m-1 hover:bg-red-50 rounded transition-colors"
                           >
                             <Trash2 className="w-4 h-4 text-red-400" />
                           </motion.button>

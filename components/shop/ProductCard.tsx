@@ -55,7 +55,7 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
 
           {/* Quick Actions */}
-          <div className="absolute bottom-4 left-4 right-4 flex gap-2 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-[opacity,transform] duration-200 ease-out">
+          <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 flex gap-2 transition-[opacity,transform] duration-200 ease-out [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:translate-y-4 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:translate-y-0">
             <motion.button
               whileHover={product.inStock ? { scale: 1.05 } : undefined}
               whileTap={product.inStock ? { scale: 0.95 } : undefined}
@@ -64,10 +64,10 @@ export function ProductCard({ product }: { product: Product }) {
                 if (product.inStock) addToCart(product)
               }}
               disabled={!product.inStock}
-              className="flex-1 flex items-center justify-center gap-2 py-3 bg-surface text-brand-900 text-sm font-medium rounded-md hover:bg-brand-900 hover:text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-surface disabled:hover:text-brand-900"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 sm:py-3 text-xs sm:text-sm bg-surface text-brand-900 text-sm font-medium rounded-md hover:bg-brand-900 hover:text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-surface disabled:hover:text-brand-900"
             >
-              <ShoppingBag className="w-4 h-4" />
-              {product.inStock ? "Add to Bag" : "Sold Out"}
+              <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+              <span className="truncate">{product.inStock ? "Add to Bag" : "Sold Out"}</span>
             </motion.button>
           </div>
         </div>
