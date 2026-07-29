@@ -86,8 +86,7 @@ export function ProductCard({ product }: { product: Product }) {
               {product.name}
             </h3>
           </Link>
-          <p className="text-xs text-brand-500 mt-1">{product.category}</p>
-          <div className="flex items-center gap-2 mt-2">
+          <div className="flex items-center gap-2 mt-1.5">
             <span className="text-sm font-medium text-brand-900">{formatPrice(product.price)}</span>
             {product.originalPrice && (
               <span className="text-xs text-brand-400 line-through">

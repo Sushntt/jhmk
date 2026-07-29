@@ -1,6 +1,7 @@
 "use client"
 
 import { useRef } from "react"
+import { ScrollDots } from "@/components/ui/ScrollDots"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Product } from "@/types"
 import { ProductCard } from "@/components/shop/ProductCard"
@@ -67,6 +68,8 @@ export function ProductCarousel({
           </div>
         ))}
       </div>
+
+      <ScrollDots scrollRef={scrollRef} />
     </section>
   )
 }

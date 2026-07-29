@@ -4,13 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { StaggerContainer, StaggerItem } from "@/components/animations/Reveal"
 import { Reveal } from "@/components/animations/Reveal"
-
-export interface CategoryTile {
-  name: string
-  href: string
-  image: string | null
-  count: number
-}
+import { CategoryTile } from "@/lib/categories"
 
 export function CategoriesGrid({ categories }: { categories: CategoryTile[] }) {
   if (categories.length === 0) return null

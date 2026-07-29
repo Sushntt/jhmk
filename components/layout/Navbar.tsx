@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { ShoppingBag, Heart, Menu, X, Search, User, LogOut, ChevronRight } from "lucide-react"
 import { useCart } from "@/hooks/useCart"
-import { homeCategories } from "@/lib/site-config"
+import type { CategoryTile } from "@/lib/categories"
 import { useWishlist } from "@/hooks/useWishlist"
 import { useAuth } from "@/hooks/useAuth"
 import { IconButton } from "@/components/ui/IconButton"
@@ -15,8 +15,18 @@ import { cn } from "@/lib/utils"
 
 const navLinks = [
   { href: "/shop", label: "Shop" },
+  { href: "/new-arrivals", label: "New Arrivals" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
+  { href: "/faq", label: "FAQ" },
+]
+
+// The drawer leads with Home and drops "Shop" - "All Products" already opens
+// the full catalogue, so listing both just doubles up.
+const mobileLinks = [
+  { href: "/new-arrivals", label: "New Arrivals" },
+  { href: "/contact", label: "Contact" },
+  { href: "/about", label: "About Us" },
   { href: "/faq", label: "FAQ" },
 ]
 
@@ -24,6 +34,18 @@ export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [productsOpen, setProductsOpen] = useState(false)
+  const [categories, setCategories] = useState<CategoryTile[]>([])
+
+  // Categories come from Airtable, so the menu matches the homepage without a
+  // second list to keep in sync. Fetched once the menu is first opened rather
+  // than on every page load.
+  useEffect(() => {
+    if (!productsOpen || categories.length > 0) return
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then((d) => setCategories(d.categories || []))
+      .catch(() => setCategories([]))
+  }, [productsOpen, categories.length])
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const pathname = usePathname()
   const { totalItems, setIsOpen: setCartOpen } = useCart()
@@ -199,6 +221,19 @@ export function Navbar() {
             className="fixed inset-0 z-40 bg-surface pt-32 px-6"
           >
             <nav className="flex flex-col gap-6 overflow-y-auto max-h-[calc(100vh-10rem)] pb-10">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+              >
+                <Link
+                  href="/"
+                  className="text-2xl font-serif text-brand-900 tracking-wide"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Home
+                </Link>
+              </motion.div>
+
               {/* All Products expands in place rather than navigating away, so
                   the shopper can pick a category without losing the menu. */}
               <motion.div
@@ -235,14 +270,15 @@ export function Navbar() {
                         View everything
                       </Link>
                     </li>
-                    {homeCategories.map((cat) => (
+                    {categories.map((cat) => (
                       <li key={cat.name}>
                         <Link
-                          href={`/shop?category=${encodeURIComponent(cat.name)}`}
+                          href={cat.href}
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className="text-base text-brand-700 hover:text-brand-900"
+                          className="flex items-center justify-between text-base text-brand-700 hover:text-brand-900"
                         >
                           {cat.name}
+                          <span className="text-xs text-brand-400">{cat.count}</span>
                         </Link>
                       </li>
                     ))}
@@ -250,12 +286,12 @@ export function Navbar() {
                 )}
               </motion.div>
 
-              {navLinks.map((link, i) => (
+              {mobileLinks.map((link, i) => (
                 <motion.div
                   key={link.href}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: (i + 1) * 0.08 }}
+                  transition={{ delay: (i + 1) * 0.06 }}
                 >
                   <Link
                     href={link.href}

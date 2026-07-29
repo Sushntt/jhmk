@@ -21,19 +21,7 @@ export function Footer() {
                 Premium imitation jewellery and fashion, named for the Indian gazelle
                 and hand-picked from makers across India. Grace in every detail.
               </p>
-              <p className="text-sm text-brand-400 mt-6">
-                Follow us on Instagram{" "}
-                <a
-                  href={siteConfig.instagramUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gold-400 hover:text-gold-300 transition-colors"
-                >
-                  @{siteConfig.instagram}
-                </a>
-              </p>
-
-              <div className="flex gap-4 mt-4">
+              <div className="flex gap-4 mt-6">
                 <motion.a
                   href={siteConfig.instagramUrl}
                   target="_blank"
@@ -141,8 +129,27 @@ export function Footer() {
           </Reveal>
         </div>
 
+        {/* Follow band. Sits across the full footer width rather than inside a
+            column, so it reads as an invitation rather than another list item. */}
+        <div className="mt-16 pt-12 border-t border-brand-900 text-center">
+          <p className="text-xs sm:text-sm tracking-[0.3em] uppercase text-brand-500 mb-5">
+            Follow us on Instagram
+          </p>
+          <a
+            href={siteConfig.instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group inline-flex items-center gap-3 text-xl sm:text-2xl font-serif text-white hover:text-gold-300 transition-colors duration-200"
+          >
+            <span className="grid place-items-center w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-brand-700 group-hover:border-gold-400 transition-colors duration-200">
+              <Instagram className="w-4 h-4 sm:w-5 sm:h-5" />
+            </span>
+            @{siteConfig.instagram}
+          </a>
+        </div>
+
         {/* Bottom Bar */}
-        <div className="mt-16 pt-8 border-t border-brand-900 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="mt-12 pt-8 border-t border-brand-900 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-brand-500">
             © {new Date().getFullYear()} Chinkara. All rights reserved.
           </p>

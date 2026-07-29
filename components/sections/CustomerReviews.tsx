@@ -3,6 +3,9 @@
 import { useRef } from "react"
 import { ChevronLeft, ChevronRight, MessageCircle } from "lucide-react"
 import { Reveal } from "@/components/animations/Reveal"
+import { ScrollDots } from "@/components/ui/ScrollDots"
+import { siteConfig } from "@/lib/site-config"
+import { Instagram } from "lucide-react"
 
 // Real customer messages, supplied by Chinkara.
 //
@@ -80,6 +83,24 @@ export function CustomerReviews() {
             Customer DM screenshots go here — send over a few and we&apos;ll drop them right in.
           </p>
         </div>
+      )}
+
+      {reviewScreenshots.length > 0 && (
+        <>
+          <ScrollDots scrollRef={scrollRef} />
+
+          <div className="flex justify-center mt-8">
+            <a
+              href={siteConfig.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-7 py-3 bg-brand-900 text-white text-sm tracking-wide rounded-full transition-colors duration-200 ease-out hover:bg-gold-600"
+            >
+              Visit our Instagram
+              <Instagram className="w-4 h-4" />
+            </a>
+          </div>
+        </>
       )}
     </section>
   )
