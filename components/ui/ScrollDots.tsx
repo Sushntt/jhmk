@@ -63,13 +63,11 @@ export function ScrollDots({
           aria-current={i === active}
           className="p-2 -m-1 group"
         >
-          {/* scale + colour rather than animating width: width is a layout
-              property and forces reflow, transforms composite on the GPU. */}
+          {/* Colour only - the dot stays the same size and simply darkens when
+              its page is in view. Nothing moves, nothing stretches. */}
           <span
-            className={`block w-1.5 h-1.5 rounded-full origin-center transition-[transform,background-color] duration-200 ease-out ${
-              i === active
-                ? "scale-x-[3] bg-brand-900"
-                : "bg-brand-300 group-hover:bg-brand-500"
+            className={`block w-2 h-2 rounded-full transition-colors duration-200 ease-out ${
+              i === active ? "bg-brand-900" : "bg-brand-300 group-hover:bg-brand-500"
             }`}
           />
         </button>

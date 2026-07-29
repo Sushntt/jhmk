@@ -1,9 +1,18 @@
 import { getAllProducts } from "@/lib/data"
 import { ProductCarousel } from "./ProductCarousel"
 
+// Driven strictly by the "Bestseller" checkbox in Airtable. It previously fell
+// back to showing every product when nothing was ticked, which made the section
+// title untrue and meant ticking the box changed nothing.
 export async function BestSellers() {
   const products = await getAllProducts()
   const bestsellers = products.filter((p) => p.bestseller)
-  const list = (bestsellers.length > 0 ? bestsellers : products).slice(0, 10)
-  return <ProductCarousel title="Best Sellers" products={list} viewAllHref="/shop?sort=bestseller" />
+
+  return (
+    <ProductCarousel
+      title="Best Sellers"
+      products={bestsellers.slice(0, 10)}
+      viewAllHref="/shop?filter=bestseller"
+    />
+  )
 }

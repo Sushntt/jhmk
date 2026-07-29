@@ -31,7 +31,12 @@ export function ShopPage({ products }: { products: Product[] }) {
     if (sort) {
       setSortBy(sort)
     }
+    // ?filter=bestseller / ?filter=new narrow the list rather than just
+    // reordering it, so "View all" from those sections shows what it promises.
+    setFlagFilter(searchParams.get("filter"))
   }, [searchParams, categories])
+
+  const [flagFilter, setFlagFilter] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState("featured")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [page, setPage] = useState(1)
@@ -39,6 +44,11 @@ export function ShopPage({ products }: { products: Product[] }) {
 
   const filtered = useMemo(() => {
     let result = [...products]
+    if (flagFilter === "bestseller") {
+      result = result.filter((p) => p.bestseller)
+    } else if (flagFilter === "new") {
+      result = result.filter((p) => p.newArrival)
+    }
     if (selectedCategory !== "All") {
       result = result.filter((p) => p.category === selectedCategory)
     }
@@ -60,11 +70,11 @@ export function ShopPage({ products }: { products: Product[] }) {
     }
 
     return result
-  }, [products, selectedCategory, sortBy, searchQuery])
+  }, [products, selectedCategory, sortBy, searchQuery, flagFilter])
 
   useEffect(() => {
     setPage(1)
-  }, [selectedCategory, sortBy, searchQuery])
+  }, [selectedCategory, sortBy, searchQuery, flagFilter])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)

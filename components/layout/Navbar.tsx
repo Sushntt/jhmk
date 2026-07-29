@@ -267,7 +267,7 @@ export function Navbar() {
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="text-base text-brand-700 hover:text-brand-900"
                       >
-                        View everything
+                        Shop All
                       </Link>
                     </li>
                     {categories.map((cat) => (

@@ -15,15 +15,12 @@ export const metadata = {
 export default async function NewArrivalsPage() {
   const products = await getAllProducts()
 
-  // Anything flagged New Arrival in Airtable comes first; the rest fall back to
-  // newest-created, so the page is never empty even before the client starts
-  // using that checkbox.
-  const flagged = products.filter((p) => p.newArrival)
-  const rest = products
-    .filter((p) => !p.newArrival)
+  // ONLY products with the "New Arrival" checkbox ticked in Airtable - the page
+  // has to match the NEW badge on the cards, otherwise ticking the box means
+  // nothing. Newest first within that set.
+  const list = products
+    .filter((p) => p.newArrival)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-
-  const list = [...flagged, ...rest].slice(0, 24)
 
   return (
     <div className="pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
@@ -44,6 +41,13 @@ export default async function NewArrivalsPage() {
           <p className="text-brand-400 text-sm mb-8">
             New pieces drop every week — check back shortly.
           </p>
+          {/* Only visible while developing: tells whoever is testing why the
+              page is empty rather than leaving them guessing. */}
+          {process.env.NODE_ENV !== "production" && (
+            <p className="text-xs text-brand-400 mb-8">
+              (No products have the &quot;New Arrival&quot; checkbox ticked in Airtable.)
+            </p>
+          )}
           <Button asChild>
             <Link href="/shop">Browse the Collection</Link>
           </Button>

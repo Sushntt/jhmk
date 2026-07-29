@@ -31,7 +31,18 @@ export function ProductCarousel({
   return (
     <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       <Reveal className="flex items-center justify-between mb-8">
-        <h2 className="text-2xl md:text-3xl font-serif text-brand-900">{title}</h2>
+        {/* The heading links through as well as the "View all" text - people
+            reach for the title first. */}
+        {viewAllHref ? (
+          <Link
+            href={viewAllHref}
+            className="text-2xl md:text-3xl font-serif text-brand-900 hover:text-gold-600 transition-colors duration-200"
+          >
+            {title}
+          </Link>
+        ) : (
+          <h2 className="text-2xl md:text-3xl font-serif text-brand-900">{title}</h2>
+        )}
         <div className="flex items-center gap-3">
           {viewAllHref && (
             <Link href={viewAllHref} className="text-sm text-brand-600 hover:text-brand-900 tracking-wide">
