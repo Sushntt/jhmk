@@ -38,8 +38,14 @@ export function ProductCard({ product }: { product: Product }) {
           {/* Badges */}
           <div className="absolute top-3 left-3 flex gap-2">
             {!product.inStock && (
-              <span className="px-2 py-1 bg-red-600 text-xs font-medium tracking-wider uppercase text-white">
+              <span className="px-2 py-1 bg-spice-600 text-xs font-medium tracking-wider uppercase text-white">
                 Out of Stock
+              </span>
+            )}
+            {/* Urgency only when it's true: in stock, but fewer than 3 left. */}
+            {product.inStock && product.stockCount > 0 && product.stockCount < 3 && (
+              <span className="px-2 py-1 bg-gold-600 text-[10px] sm:text-xs font-medium tracking-wide text-white">
+                Limited stock
               </span>
             )}
             {product.newArrival && (

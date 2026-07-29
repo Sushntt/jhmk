@@ -31,3 +31,22 @@ export const siteConfig = {
 // falling back to the value above.
 export const whatsappNumber =
   process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || siteConfig.whatsappNumber
+
+
+// Homepage category tiles, in display order.
+//
+// `match` values are compared case-insensitively against a product's Category
+// field in Airtable, so a tile picks up its image from the first product in
+// that category automatically. Add the same names as Category options in the
+// Airtable Products table or the tile will link to an empty filter.
+export const homeCategories: { name: string; match: string[]; fallback?: string }[] = [
+  { name: "Premium Necklaces", match: ["premium necklace", "premium necklaces"], fallback: "/images/collection-necklaces.jpg" },
+  { name: "Budget Friendly Neckpieces", match: ["budget friendly neckpieces", "budget neckpieces", "budget friendly neckpiece"] },
+  { name: "Harams & Sets", match: ["harams and sets", "harams & sets", "haram", "harams"] },
+  { name: "Premium Earrings", match: ["premium earrings", "premium earring"] },
+  { name: "Budget Friendly Earrings", match: ["budget friendly earrings", "budget earrings"] },
+  { name: "Oxidised Earrings", match: ["oxidised earrings", "oxidized earrings", "oxidised earring"] },
+  { name: "Micro Gold Plated Bangles", match: ["micro gold plated bangles", "micro gold bangles", "bangles", "bangle"] },
+  { name: "Bracelets", match: ["bracelets", "bracelet"], fallback: "/images/collection-bracelets.jpg" },
+  { name: "Anklets", match: ["anklets", "anklet"] },
+]

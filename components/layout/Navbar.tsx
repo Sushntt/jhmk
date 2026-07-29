@@ -4,8 +4,9 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { ShoppingBag, Heart, Menu, X, Search, User, LogOut } from "lucide-react"
+import { ShoppingBag, Heart, Menu, X, Search, User, LogOut, ChevronRight } from "lucide-react"
 import { useCart } from "@/hooks/useCart"
+import { homeCategories } from "@/lib/site-config"
 import { useWishlist } from "@/hooks/useWishlist"
 import { useAuth } from "@/hooks/useAuth"
 import { IconButton } from "@/components/ui/IconButton"
@@ -22,6 +23,7 @@ const navLinks = [
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [productsOpen, setProductsOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const pathname = usePathname()
   const { totalItems, setIsOpen: setCartOpen } = useCart()
@@ -51,6 +53,7 @@ export function Navbar() {
 
   useEffect(() => {
     setIsMobileMenuOpen(false)
+    setProductsOpen(false)
   }, [pathname])
 
   const isHome = pathname === "/"
@@ -195,13 +198,64 @@ export function Navbar() {
             transition={{ duration: 0.3 }}
             className="fixed inset-0 z-40 bg-surface pt-32 px-6"
           >
-            <nav className="flex flex-col gap-6">
+            <nav className="flex flex-col gap-6 overflow-y-auto max-h-[calc(100vh-10rem)] pb-10">
+              {/* All Products expands in place rather than navigating away, so
+                  the shopper can pick a category without losing the menu. */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.05 }}
+              >
+                <button
+                  onClick={() => setProductsOpen((o) => !o)}
+                  aria-expanded={productsOpen}
+                  className="flex items-center justify-between w-full text-2xl font-serif text-brand-900 tracking-wide"
+                >
+                  All Products
+                  <ChevronRight
+                    className={`w-5 h-5 text-brand-400 transition-transform duration-200 ${
+                      productsOpen ? "rotate-90" : ""
+                    }`}
+                  />
+                </button>
+
+                {productsOpen && (
+                  <motion.ul
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.2 }}
+                    className="mt-4 ml-1 border-l border-brand-200 pl-4 space-y-3"
+                  >
+                    <li>
+                      <Link
+                        href="/shop"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="text-base text-brand-700 hover:text-brand-900"
+                      >
+                        View everything
+                      </Link>
+                    </li>
+                    {homeCategories.map((cat) => (
+                      <li key={cat.name}>
+                        <Link
+                          href={`/shop?category=${encodeURIComponent(cat.name)}`}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="text-base text-brand-700 hover:text-brand-900"
+                        >
+                          {cat.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </motion.ul>
+                )}
+              </motion.div>
+
               {navLinks.map((link, i) => (
                 <motion.div
                   key={link.href}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1 }}
+                  transition={{ delay: (i + 1) * 0.08 }}
                 >
                   <Link
                     href={link.href}

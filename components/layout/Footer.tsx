@@ -21,7 +21,19 @@ export function Footer() {
                 Premium imitation jewellery and fashion, named for the Indian gazelle
                 and hand-picked from makers across India. Grace in every detail.
               </p>
-              <div className="flex gap-4 mt-6">
+              <p className="text-sm text-brand-400 mt-6">
+                Follow us on Instagram{" "}
+                <a
+                  href={siteConfig.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gold-400 hover:text-gold-300 transition-colors"
+                >
+                  @{siteConfig.instagram}
+                </a>
+              </p>
+
+              <div className="flex gap-4 mt-4">
                 <motion.a
                   href={siteConfig.instagramUrl}
                   target="_blank"

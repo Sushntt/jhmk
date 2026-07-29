@@ -111,8 +111,13 @@ export function ProductDetail({ product, related }: { product: Product; related:
                 </span>
               )}
               {!product.inStock && (
-                <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium tracking-wide rounded">
+                <span className="px-2 py-1 bg-spice-100 text-spice-700 text-xs font-medium tracking-wide rounded">
                   OUT OF STOCK
+                </span>
+              )}
+              {product.inStock && product.stockCount > 0 && product.stockCount < 3 && (
+                <span className="px-2 py-1 bg-gold-100 text-gold-700 text-xs font-medium tracking-wide rounded">
+                  Limited stock available — only {product.stockCount} left
                 </span>
               )}
             </div>

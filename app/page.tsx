@@ -15,10 +15,10 @@ export default function HomePage() {
       <Hero />
       <Categories />
       <NewArrivals />
-      {/* Dark band between the two product carousels - gives the page a change
-          of pace instead of four pale sections stacked in a row. */}
-      <Collections />
       <BestSellers />
+      {/* Dark band after the two product carousels - gives the page a change of
+          pace instead of pale sections stacked all the way down. */}
+      <Collections />
       <CustomerReviews />
       {/* Delivery and support facts sit just before the brand story, where a
           shopper who has scrolled this far is weighing up whether to order. */}

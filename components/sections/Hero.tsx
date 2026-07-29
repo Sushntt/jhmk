@@ -15,9 +15,31 @@ const ease = [0.22, 1, 0.36, 1] as const
 // stretched, and the page reads as editorial instead of accidental.
 export function Hero() {
   return (
-    <section className="relative min-h-screen lg:h-screen flex flex-col lg:flex-row overflow-hidden bg-brand-950">
+    <section className="relative min-h-screen lg:h-screen flex items-center overflow-hidden bg-brand-950">
+      {/* Photo sits behind the copy. On narrow screens it is pushed right so the
+          subject stays clear of the headline; on wide screens it fills the frame. */}
+      <motion.div
+        initial={{ opacity: 0, scale: 1.06 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.6, ease }}
+        className="absolute inset-0"
+      >
+        <Image
+          src="/images/hero-model.jpg"
+          alt="Model wearing Chinkara jewellery"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-[72%_18%] lg:object-[68%_22%]"
+        />
+      </motion.div>
+
+      {/* Scrim: heaviest where the type sits, easing off over the subject. */}
+      <div className="absolute inset-0 bg-gradient-to-r from-brand-950/92 via-brand-950/70 to-brand-950/25" />
+      <div className="absolute inset-0 bg-gradient-to-t from-brand-950/70 via-transparent to-brand-950/40" />
+
       {/* Type side */}
-      <div className="relative z-10 flex-1 flex items-center px-6 sm:px-10 lg:px-16 pt-32 pb-16 lg:py-0">
+      <div className="relative z-10 w-full flex items-center px-6 sm:px-10 lg:px-16 pt-32 pb-20 lg:py-0">
         {/* Faint oversized emblem as a watermark - brand presence without
             another element competing for attention. */}
         <div
@@ -86,7 +108,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.75, ease }}
-            className="flex flex-col sm:flex-row gap-3 sm:gap-4"
+            className="flex"
           >
             <Button asChild size="lg" className="bg-surface text-brand-900 hover:bg-gold-100">
               <Link href="/shop">
@@ -94,37 +116,10 @@ export function Hero() {
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="border-white/30 text-white hover:bg-surface/10 hover:border-white"
-            >
-              <Link href="/about">Our Story</Link>
-            </Button>
           </motion.div>
         </div>
       </div>
 
-      {/* Image side - portrait shown as a portrait */}
-      <motion.div
-        initial={{ opacity: 0, scale: 1.04 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 1.4, delay: 0.2, ease }}
-        className="relative w-full lg:w-[44%] xl:w-[46%] h-[58vh] lg:h-auto flex-shrink-0"
-      >
-        <Image
-          src="/images/hero-model.jpg"
-          alt="Model wearing Chinkara jewellery"
-          fill
-          priority
-          sizes="(max-width: 1024px) 100vw, 46vw"
-          className="object-cover object-[50%_18%]"
-        />
-        {/* Soft seam between the photo and the type field */}
-        <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-brand-950 to-transparent hidden lg:block" />
-        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-brand-950 to-transparent lg:hidden" />
-      </motion.div>
 
       {/* Scroll cue */}
       <motion.div
