@@ -32,6 +32,7 @@ export default function CheckoutPage() {
   const [pincode, setPincode] = useState("")
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [stockWarning, setStockWarning] = useState("")
   const [isSigningIn, setIsSigningIn] = useState(false)
 
   // Pre-fill from the saved profile once the user is loaded
@@ -80,6 +81,7 @@ export default function CheckoutPage() {
   }
 
   const handlePlaceOrder = async () => {
+    setStockWarning("")
     if (missing.length > 0) return
 
     setIsSubmitting(true)
@@ -93,7 +95,7 @@ export default function CheckoutPage() {
         pincode: pincode.trim(),
       })
 
-      await fetch("/api/orders", {
+      const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -114,6 +116,23 @@ export default function CheckoutPage() {
           total,
         }),
       })
+      // If another customer's order was confirmed for the same piece while this
+      // one was being filled in, say so now rather than sending them to WhatsApp
+      // to ask about something already sold.
+      const data = await res.json().catch(() => null)
+      if (data?.unavailable?.length > 0) {
+        setStockWarning(
+          data.unavailable
+            .map((u: { name: string; available: number }) =>
+              u.available === 0
+                ? `${u.name} has just sold out`
+                : `${u.name} — only ${u.available} left`
+            )
+            .join(". ")
+        )
+        setIsSubmitting(false)
+        return
+      }
     } catch (e) {
       console.error("Order logging failed, continuing to WhatsApp anyway:", e)
     } finally {
@@ -340,10 +359,23 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
+                {stockWarning && (
+                  <div className="mt-8 p-4 bg-spice-50 border border-spice-200 rounded-lg">
+                    <p className="text-sm text-spice-700 font-medium mb-1">
+                      Availability has changed
+                    </p>
+                    <p className="text-sm text-spice-700">{stockWarning}.</p>
+                    <p className="text-xs text-spice-600 mt-2">
+                      Please adjust your bag, or message us on WhatsApp and we&apos;ll help find
+                      something similar.
+                    </p>
+                  </div>
+                )}
+
                 <Button
                   onClick={handlePlaceOrder}
                   disabled={isSubmitting || missing.length > 0}
-                  className="w-full bg-green-700 hover:bg-green-800 text-white mt-8"
+                  className="w-full bg-green-700 hover:bg-green-800 text-white mt-6"
                   size="lg"
                 >
                   <MessageCircle className="w-5 h-5 mr-2" />

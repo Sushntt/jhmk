@@ -141,11 +141,15 @@ export function ProductDetail({ product, related }: { product: Product; related:
                 </button>
               </div>
 
-              {/* Sits beside the quantity selector, where it's actually useful -
-                  the shopper is choosing how many at this exact moment. */}
+              {/* Sits beside the quantity selector, where it actually affects a
+                  decision - the shopper is choosing how many right now. Wording
+                  adapts because "only 1 available" reads awkwardly for a piece
+                  Chinkara only ever stocks one of. */}
               {product.inStock && product.stockCount > 0 && product.stockCount < 3 && (
                 <span className="text-sm text-gold-700 font-medium">
-                  Limited stock — only {product.stockCount} available
+                  {product.stockCount === 1
+                    ? "Last one available"
+                    : `Only ${product.stockCount} left`}
                 </span>
               )}
             </div>

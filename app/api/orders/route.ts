@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { createOrder } from "@/lib/airtable"
+import { createOrder, checkStock } from "@/lib/airtable"
 
 export const dynamic = "force-dynamic"
 
@@ -12,11 +12,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing or invalid order fields" }, { status: 400 })
     }
 
+    // Live stock check before the order is logged, so the customer finds out
+    // now rather than after messaging about something already sold.
+    const stockCheck = await checkStock(items)
+    const unavailable = stockCheck.filter((r) => !r.ok)
+
     const result = await createOrder({ customerName, email, phone, address, items, total })
     return NextResponse.json({
       ok: true,
       logged: result !== null && result.order !== null,
       orderError: result?.orderError || null,
+      unavailable,
       stockResults: result?.stockResults || [],
     })
   } catch (err) {

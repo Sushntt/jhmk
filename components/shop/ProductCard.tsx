@@ -36,32 +36,38 @@ export function ProductCard({ product }: { product: Product }) {
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
 
           {/* Badges.
-              Previously all four sat in one row and overflowed the card - the
-              last one was cut off mid-word on a phone. Stock status now sits
-              top-left and marketing flags top-right, and only ONE stock badge
-              can ever show, so they can't collide. */}
+              A 2-column mobile card is ~173px wide. "OUT OF STOCK" plus
+              "BESTSELLER" needs ~210px, so side by side they clipped mid-word.
+              When a piece is sold out that is the only thing worth saying, so
+              the marketing flags are suppressed and the wording shortened to
+              match the button.
+
+              Badges wrap rather than clip, so a piece can carry Limited stock,
+              New and Bestseller without anything being cut off. The exact count
+              is on the product page beside the quantity picker. */}
           {!product.inStock ? (
             <span className="absolute top-3 left-3 px-2 py-1 bg-spice-600 text-[10px] sm:text-xs font-medium tracking-wider uppercase text-white">
-              Out of Stock
+              Sold Out
             </span>
-          ) : product.stockCount > 0 && product.stockCount < 3 ? (
-            <span className="absolute top-3 left-3 px-2 py-1 bg-gold-600 text-[10px] sm:text-xs font-medium tracking-wide text-white">
-              Only {product.stockCount} left
-            </span>
-          ) : null}
-
-          <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
-            {product.newArrival && (
-              <span className="px-2 py-1 bg-surface/90 text-[10px] sm:text-xs tracking-wider uppercase text-brand-900">
-                New
-              </span>
-            )}
-            {product.bestseller && (
-              <span className="px-2 py-1 bg-gold-500/90 text-[10px] sm:text-xs tracking-wider uppercase text-white">
-                Bestseller
-              </span>
-            )}
-          </div>
+          ) : (
+            <div className="absolute top-3 left-3 right-3 flex flex-wrap items-start gap-1.5">
+              {product.stockCount > 0 && product.stockCount <= 3 && (
+                <span className="px-2 py-1 bg-gold-600 text-[10px] sm:text-xs font-medium tracking-wide text-white">
+                  Limited stock
+                </span>
+              )}
+              {product.newArrival && (
+                <span className="px-2 py-1 bg-surface/90 text-[10px] sm:text-xs tracking-wider uppercase text-brand-900">
+                  New
+                </span>
+              )}
+              {product.bestseller && (
+                <span className="px-2 py-1 bg-gold-500/90 text-[10px] sm:text-xs tracking-wider uppercase text-white">
+                  Bestseller
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Quick Actions */}
           <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 flex gap-2 transition-[opacity,transform] duration-200 ease-out [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:translate-y-4 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:translate-y-0">

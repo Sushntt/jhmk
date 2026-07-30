@@ -354,3 +354,54 @@ export async function markStockDeducted(orderId: string): Promise<void> {
     body: JSON.stringify({ fields: { "Stock Deducted": true } }),
   })
 }
+
+
+export interface StockCheckItem {
+  productId?: string
+  name: string
+  quantity: number
+}
+
+export interface StockCheckResult {
+  name: string
+  requested: number
+  available: number
+  ok: boolean
+}
+
+/**
+ * Reads live stock for the items in an order, right before the customer is sent
+ * to WhatsApp.
+ *
+ * This closes most of the two-shoppers-one-piece window. It cannot close all of
+ * it - stock only comes off once an order is CONFIRMED, so two people can still
+ * reach WhatsApp for the same last piece within the same few minutes. That is
+ * inherent to confirming orders by hand, and the client resolves it in chat.
+ * What this does prevent is someone ordering a piece that has already been sold
+ * and confirmed to somebody else.
+ */
+export async function checkStock(items: StockCheckItem[]): Promise<StockCheckResult[]> {
+  if (!isAirtableConfigured) return []
+
+  const results: StockCheckResult[] = []
+
+  for (const item of items) {
+    if (!item.productId) continue
+    try {
+      const rec = await airtableRequest(`${encodeURIComponent(PRODUCTS_TABLE)}/${item.productId}`)
+      const available = typeof rec.fields["Stock"] === "number" ? rec.fields["Stock"] : 0
+      results.push({
+        name: item.name,
+        requested: item.quantity,
+        available,
+        ok: available >= item.quantity,
+      })
+    } catch (err) {
+      // A failed read must not block the order - the client confirms manually
+      // anyway, so we simply don't warn rather than stopping the sale.
+      console.error(`Stock check failed for ${item.productId}:`, err)
+    }
+  }
+
+  return results
+}
