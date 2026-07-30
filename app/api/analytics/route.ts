@@ -148,6 +148,7 @@ export async function GET() {
     items: o.items.map((i) => ({ name: i.product.name, quantity: i.quantity, price: i.product.price })),
     total: o.total,
     status: o.status,
+    stockDeducted: true,
     createdAt: o.createdAt,
     createdTime: o.createdAt,
   }))

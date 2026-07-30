@@ -75,14 +75,19 @@ export function WishlistDrawer() {
                       transition={{ delay: index * 0.05 }}
                       className="flex gap-4 group"
                     >
-                      <div className="relative w-24 h-24 bg-brand-50 rounded-lg overflow-hidden flex-shrink-0">
+                      <Link
+                        href={`/shop/${item.slug}`}
+                        onClick={() => setIsOpen(false)}
+                        className="relative w-24 h-24 bg-brand-100 rounded-lg overflow-hidden flex-shrink-0"
+                      >
                         <Image
                           src={item.images[0]}
                           alt={item.name}
                           fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-110"
+                          sizes="96px"
+                          className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
                         />
-                      </div>
+                      </Link>
                       <div className="flex-1 min-w-0">
                         <Link
                           href={`/shop/${item.slug}`}

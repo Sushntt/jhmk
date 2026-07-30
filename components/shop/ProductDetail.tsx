@@ -115,17 +115,13 @@ export function ProductDetail({ product, related }: { product: Product; related:
                   OUT OF STOCK
                 </span>
               )}
-              {product.inStock && product.stockCount > 0 && product.stockCount < 3 && (
-                <span className="px-2 py-1 bg-gold-100 text-gold-700 text-xs font-medium tracking-wide rounded">
-                  Limited stock available — only {product.stockCount} left
-                </span>
-              )}
+
             </div>
 
             <p className="text-brand-600 leading-relaxed mb-8">{product.description}</p>
 
             {/* Quantity */}
-            <div className="flex items-center gap-4 mb-8">
+            <div className="flex items-center flex-wrap gap-3 sm:gap-4 mb-8">
               <span className="text-sm text-brand-700">Quantity</span>
               <div className="flex items-center border border-brand-200 rounded-lg">
                 <button
@@ -144,6 +140,14 @@ export function ProductDetail({ product, related }: { product: Product; related:
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
+
+              {/* Sits beside the quantity selector, where it's actually useful -
+                  the shopper is choosing how many at this exact moment. */}
+              {product.inStock && product.stockCount > 0 && product.stockCount < 3 && (
+                <span className="text-sm text-gold-700 font-medium">
+                  Limited stock — only {product.stockCount} available
+                </span>
+              )}
             </div>
 
             {/* Actions */}

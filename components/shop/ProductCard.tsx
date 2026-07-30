@@ -35,26 +35,29 @@ export function ProductCard({ product }: { product: Product }) {
           {/* Hover Overlay */}
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
 
-          {/* Badges */}
-          <div className="absolute top-3 left-3 flex gap-2">
-            {!product.inStock && (
-              <span className="px-2 py-1 bg-spice-600 text-xs font-medium tracking-wider uppercase text-white">
-                Out of Stock
-              </span>
-            )}
-            {/* Urgency only when it's true: in stock, but fewer than 3 left. */}
-            {product.inStock && product.stockCount > 0 && product.stockCount < 3 && (
-              <span className="px-2 py-1 bg-gold-600 text-[10px] sm:text-xs font-medium tracking-wide text-white">
-                Limited stock
-              </span>
-            )}
+          {/* Badges.
+              Previously all four sat in one row and overflowed the card - the
+              last one was cut off mid-word on a phone. Stock status now sits
+              top-left and marketing flags top-right, and only ONE stock badge
+              can ever show, so they can't collide. */}
+          {!product.inStock ? (
+            <span className="absolute top-3 left-3 px-2 py-1 bg-spice-600 text-[10px] sm:text-xs font-medium tracking-wider uppercase text-white">
+              Out of Stock
+            </span>
+          ) : product.stockCount > 0 && product.stockCount < 3 ? (
+            <span className="absolute top-3 left-3 px-2 py-1 bg-gold-600 text-[10px] sm:text-xs font-medium tracking-wide text-white">
+              Only {product.stockCount} left
+            </span>
+          ) : null}
+
+          <div className="absolute top-3 right-3 flex flex-col items-end gap-1.5">
             {product.newArrival && (
-              <span className="px-2 py-1 bg-surface/90 text-xs tracking-wider uppercase text-brand-900">
+              <span className="px-2 py-1 bg-surface/90 text-[10px] sm:text-xs tracking-wider uppercase text-brand-900">
                 New
               </span>
             )}
             {product.bestseller && (
-              <span className="px-2 py-1 bg-gold-500/90 text-xs tracking-wider uppercase text-white">
+              <span className="px-2 py-1 bg-gold-500/90 text-[10px] sm:text-xs tracking-wider uppercase text-white">
                 Bestseller
               </span>
             )}

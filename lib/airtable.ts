@@ -51,6 +51,7 @@ export interface AirtableOrderRecord {
   items: { productId?: string; name: string; quantity: number; price: number }[]
   total: number
   status: string
+  stockDeducted: boolean
   createdAt: string
   createdTime: string
 }
@@ -192,10 +193,16 @@ export async function getProducts(): Promise<Product[]> {
 
 // Reduces stock for each ordered item by its quantity (never below 0).
 // Called right after an order is logged so "OUT OF STOCK" reflects reality.
+export interface StockResult {
+  productId: string
+  ok: boolean
+  error?: string
+}
+
 export async function decrementStock(
   items: { productId?: string; quantity: number }[]
-): Promise<{ productId: string; ok: boolean; error?: string }[]> {
-  const results: { productId: string; ok: boolean; error?: string }[] = []
+): Promise<StockResult[]> {
+  const results: StockResult[] = []
   if (!isAirtableConfigured) return results
 
   for (const item of items) {
@@ -244,6 +251,7 @@ export async function getOrders(): Promise<AirtableOrderRecord[]> {
         items: parseItems(rec.fields["Items"]),
         total: rec.fields["Total"] || 0,
         status: rec.fields["Status"] || "pending",
+        stockDeducted: !!rec.fields["Stock Deducted"],
         createdAt: rec.fields["Created At"] || rec.createdTime,
         // Airtable always supplies createdTime as ISO - used for sorting so a
         // human-readable "Created At" string can never break date ordering.
@@ -299,15 +307,11 @@ export async function createOrder(order: {
     console.error("Failed to write order record to Airtable Orders table:", err)
   }
 
-  // Deduct stock right away so the site reflects it immediately. This runs
-  // regardless of whether the Orders table write above succeeded.
-  const stockResults = await decrementStock(order.items)
-  const failedStock = stockResults.filter((r) => !r.ok)
-  if (failedStock.length > 0) {
-    console.error("Stock deduction failed for some items:", failedStock)
-  }
-
-  return { order: result, orderError, stockResults }
+  // NOTE: stock is deliberately NOT deducted here. Reaching WhatsApp is not the
+  // same as placing an order - shoppers abandon at that step all the time, and
+  // deducting on click made pieces show as sold out that were never sold.
+  // Deduction happens in /api/sync-stock once the order Status is "confirmed".
+  return { order: result, orderError, stockResults: [] as StockResult[] }
 }
 
 
@@ -339,4 +343,14 @@ export async function createTestOrderRecord(): Promise<string> {
   }
 
   return created.id
+}
+
+
+// Marks an order as having had its stock taken off, so a retry or a second cron
+// run can never deduct the same order twice.
+export async function markStockDeducted(orderId: string): Promise<void> {
+  await airtableRequest(`${encodeURIComponent(ORDERS_TABLE)}/${orderId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ fields: { "Stock Deducted": true } }),
+  })
 }
