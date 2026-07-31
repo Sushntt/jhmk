@@ -15,8 +15,13 @@ const ease = [0.22, 1, 0.36, 1] as const
  * fill or composite needed. Mobile uses a portrait crop of the same frame,
  * centred on the subject.
  *
- * Vertical anchor is 30%: the head sits between 16% and 50% of the frame, and
- * shorter viewports crop from the top and bottom, so centring would clip it.
+ * The desktop frame has its backdrop extended leftwards to 2.2, because the
+ * original 1.50 crop lost 44% of the photo's height on a wide short screen and
+ * cut the subject off. Extending a plain gradient backdrop is lossless where
+ * cropping the subject is not.
+ *
+ * Anchored at 68% across and 30% down: the subject sits right of centre and the
+ * head between 16% and 50%, so centring would clip her on shorter viewports.
  */
 export function Hero() {
   return (
@@ -47,7 +52,7 @@ export function Hero() {
           fill
           priority
           sizes="100vw"
-          className="hidden lg:block object-cover object-[center_30%]"
+          className="hidden lg:block object-cover object-[68%_30%]"
         />
       </motion.div>
 
