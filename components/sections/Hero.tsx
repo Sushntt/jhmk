@@ -9,9 +9,10 @@ const ease = [0.22, 1, 0.36, 1] as const
 
 export function Hero() {
   return (
-    // Near-full height on a phone, capped on a laptop - a 100vh hero on a wide
-    // screen pushes every product below the fold.
-    <section className="relative h-[88vh] min-h-[520px] lg:h-[78vh] lg:max-h-[680px] flex items-center justify-center overflow-hidden bg-brand-950">
+    // Starts directly below the fixed header (36px promo bar + 80px navbar =
+    // 116px) rather than running behind it, so the header reads as a solid bar
+    // and the photograph is never cropped by it.
+    <section className="relative mt-[116px] h-[calc(78vh-116px)] min-h-[380px] lg:h-[calc(84vh-116px)] lg:max-h-[560px] flex items-center justify-center overflow-hidden bg-brand-950">
       {/* Photo fills the frame behind the copy */}
       <motion.div
         initial={{ opacity: 0, scale: 1.05 }}
@@ -25,20 +26,20 @@ export function Hero() {
           fill
           priority
           sizes="100vw"
-          className="object-cover object-[60%_20%] lg:object-[55%_25%]"
+          className="object-cover object-[58%_18%] lg:object-[52%_22%]"
         />
       </motion.div>
 
       {/* Scrim. Darkest through the middle band where the type sits, so the
           headline stays legible without flattening the whole photograph. */}
-      <div className="absolute inset-0 bg-gradient-to-b from-brand-950/55 via-brand-950/65 to-brand-950/55" />
+      <div className="absolute inset-0 bg-gradient-to-b from-brand-950/45 via-brand-950/60 to-brand-950/50" />
 
       <div className="relative z-10 text-center px-6 max-w-3xl mx-auto">
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.25, ease }}
-          className="font-serif italic text-gold-100 leading-[1.15] pb-2 mb-10 text-4xl sm:text-5xl lg:text-6xl drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)]"
+          className="font-serif italic text-gold-100 leading-[1.15] pb-2 mb-8 text-3xl sm:text-4xl lg:text-5xl drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)]"
         >
           Grace in every detail
         </motion.h1>
@@ -50,7 +51,7 @@ export function Hero() {
         >
           <Link
             href="/shop"
-            className="inline-block px-12 py-4 border border-white/70 text-white text-sm tracking-[0.2em] uppercase transition-colors duration-200 ease-out hover:bg-white hover:text-brand-900"
+            className="inline-block px-10 py-3.5 border border-white/70 text-white text-xs sm:text-sm tracking-[0.2em] uppercase transition-colors duration-200 ease-out hover:bg-white hover:text-brand-900"
           >
             Shop Now
           </Link>

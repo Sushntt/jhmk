@@ -31,7 +31,6 @@ const mobileLinks = [
 ]
 
 export function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [productsOpen, setProductsOpen] = useState(false)
   const [categories, setCategories] = useState<CategoryTile[]>([])
@@ -52,27 +51,6 @@ export function Navbar() {
   const { items: wishlistItems, setIsOpen: setWishlistOpen } = useWishlist()
   const { user, signIn, signOut } = useAuth()
 
-  // A scroll listener fires on every scroll frame and re-renders the navbar
-  // each time. IntersectionObserver does the same job off the main thread and
-  // only fires when the threshold is actually crossed.
-  useEffect(() => {
-    const sentinel = document.createElement("div")
-    sentinel.setAttribute("aria-hidden", "true")
-    sentinel.style.cssText = "position:absolute;top:0;left:0;height:50px;width:1px;pointer-events:none;"
-    document.body.prepend(sentinel)
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsScrolled(!entry.isIntersecting),
-      { threshold: 0 }
-    )
-    observer.observe(sentinel)
-
-    return () => {
-      observer.disconnect()
-      sentinel.remove()
-    }
-  }, [])
-
   useEffect(() => {
     setIsMobileMenuOpen(false)
     setProductsOpen(false)
@@ -87,10 +65,10 @@ export function Navbar() {
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
         className={cn(
-          "fixed top-9 left-0 right-0 z-50 transition-[background-color,box-shadow,padding] duration-300 ease-out",
-          isScrolled || !isHome
-            ? "bg-surface/95 backdrop-blur-md shadow-sm"
-            : "bg-transparent"
+          "fixed top-9 left-0 right-0 z-50 transition-[background-color,box-shadow] duration-300 ease-out",
+          isHome
+            ? "bg-brand-950 shadow-sm"
+            : "bg-surface/95 backdrop-blur-md shadow-sm"
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -100,7 +78,7 @@ export function Navbar() {
               <motion.span
                 className={cn(
                   "text-2xl font-serif tracking-widest uppercase",
-                  isScrolled || !isHome ? "text-brand-900" : "text-white"
+                  isHome ? "text-white" : "text-brand-900"
                 )}
                 whileHover={{ scale: 1.02 }}
               >
@@ -116,7 +94,7 @@ export function Navbar() {
                   href={link.href}
                   className={cn(
                     "text-sm tracking-widest uppercase transition-colors duration-300 relative group",
-                    isScrolled || !isHome ? "text-brand-700 hover:text-brand-900" : "text-white/90 hover:text-white"
+                    isHome ? "text-white/90 hover:text-white" : "text-brand-700 hover:text-brand-900"
                   )}
                 >
                   {link.label}
@@ -130,7 +108,7 @@ export function Navbar() {
               <IconButton
                 onClick={() => setIsSearchOpen(true)}
                 className={cn(
-                  isScrolled || !isHome ? "text-brand-900" : "text-white"
+                  isHome ? "text-white" : "text-brand-900"
                 )}
               >
                 <Search className="w-5 h-5" />
@@ -140,7 +118,7 @@ export function Navbar() {
                 onClick={() => setWishlistOpen(true)}
                 badge={wishlistItems.length}
                 className={cn(
-                  isScrolled || !isHome ? "text-brand-900" : "text-white"
+                  isHome ? "text-white" : "text-brand-900"
                 )}
               >
                 <Heart className="w-5 h-5" />
@@ -150,7 +128,7 @@ export function Navbar() {
                 onClick={() => setCartOpen(true)}
                 badge={totalItems}
                 className={cn(
-                  isScrolled || !isHome ? "text-brand-900" : "text-white"
+                  isHome ? "text-white" : "text-brand-900"
                 )}
               >
                 <ShoppingBag className="w-5 h-5" />
@@ -161,7 +139,7 @@ export function Navbar() {
                   <Link href="/account">
                     <IconButton
                       className={cn(
-                        isScrolled || !isHome ? "text-brand-900" : "text-white"
+                        isHome ? "text-white" : "text-brand-900"
                       )}
                     >
                       <User className="w-5 h-5" />
@@ -170,7 +148,7 @@ export function Navbar() {
                   <IconButton
                     onClick={signOut}
                     className={cn(
-                      isScrolled || !isHome ? "text-brand-900" : "text-white"
+                      isHome ? "text-white" : "text-brand-900"
                     )}
                   >
                     <LogOut className="w-5 h-5" />
@@ -181,9 +159,9 @@ export function Navbar() {
                   onClick={signIn}
                   className={cn(
                     "hidden md:flex items-center gap-2 text-sm tracking-wider uppercase px-4 py-2 rounded-full transition-colors duration-200",
-                    isScrolled || !isHome
-                      ? "text-brand-900 border border-brand-900 hover:bg-brand-900 hover:text-white"
-                      : "text-white border border-white/50 hover:bg-surface/10"
+                    isHome
+                      ? "text-white border border-white/50 hover:bg-surface/10"
+                      : "text-brand-900 border border-brand-900 hover:bg-brand-900 hover:text-white"
                   )}
                 >
                   <User className="w-4 h-4" />
@@ -196,11 +174,8 @@ export function Navbar() {
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className={cn(
                   "md:hidden p-2",
-                  isMobileMenuOpen
-                    ? "text-brand-900"
-                    : isScrolled || !isHome
-                    ? "text-brand-900"
-                    : "text-white"
+                  // Menu panel is always light, so the close X must be dark
+                  isMobileMenuOpen ? "text-brand-900" : isHome ? "text-white" : "text-brand-900"
                 )}
               >
                 {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
