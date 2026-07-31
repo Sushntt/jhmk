@@ -179,7 +179,7 @@ export default function AccountPage() {
                     {inner}
                   </Link>
                 ) : (
-                  <button onClick={t.onClick} className="block w-full h-full text-left">
+                  <button onClick={t.onClick} aria-label={t.title} className="block w-full h-full text-left">
                     {inner}
                   </button>
                 )}

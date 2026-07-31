@@ -292,7 +292,13 @@ export default function CheckoutPage() {
               <div className="bg-surface border border-brand-200 rounded-lg p-6 sm:p-8">
                 <div className="flex items-center gap-3 mb-8 pb-6 border-b border-brand-200">
                   {user.photoURL ? (
-                    <img src={user.photoURL} alt={user.name} className="w-10 h-10 rounded-full" />
+                    <Image
+                      src={user.photoURL}
+                      alt={user.name}
+                      width={40}
+                      height={40}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-brand-100 grid place-items-center">
                       <User className="w-5 h-5 text-brand-500" />

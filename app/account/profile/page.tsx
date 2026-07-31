@@ -108,7 +108,7 @@ export default function ProfilePage() {
                 disabled
                 className="w-full px-4 py-3 border border-brand-200 rounded-lg bg-brand-50 text-brand-500 cursor-not-allowed"
               />
-              <p className="text-xs text-brand-400 mt-1">Email is linked to your sign-in and can't be changed here.</p>
+              <p className="text-xs text-brand-400 mt-1">Email is linked to your sign-in and can&apos;t be changed here.</p>
             </div>
 
             <div>

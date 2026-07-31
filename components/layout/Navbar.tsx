@@ -174,8 +174,11 @@ export function Navbar() {
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className={cn(
                   "md:hidden p-2",
-                  // Menu panel is always light, so the close X must be dark
-                  isMobileMenuOpen ? "text-brand-900" : isHome ? "text-white" : "text-brand-900"
+                  // The button always sits inside the navbar bar - the menu
+                  // panel opens BELOW it at a lower z-index - so its colour must
+                  // follow the navbar, not the menu state. Tying it to the menu
+                  // rendered a dark X on the dark home navbar.
+                  isHome ? "text-white" : "text-brand-900"
                 )}
               >
                 {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

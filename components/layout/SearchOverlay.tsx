@@ -102,6 +102,7 @@ export function SearchOverlay({ isOpen, onClose }: { isOpen: boolean; onClose: (
                 <button
                   type="button"
                   onClick={onClose}
+                  aria-label="Close search"
                   className="p-2 hover:bg-brand-100 rounded-full transition-colors flex-shrink-0"
                 >
                   <X className="w-5 h-5 text-brand-700" />

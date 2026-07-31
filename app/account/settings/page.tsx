@@ -83,7 +83,7 @@ export default function SettingsPage() {
       <Reveal delay={0.1}>
         <div className="bg-surface rounded-lg border border-brand-200 p-8 mb-6">
           <h2 className="text-lg font-serif text-brand-900 mb-1">Notifications</h2>
-          <p className="text-sm text-brand-500 mb-6">Choose what you'd like to hear about.</p>
+          <p className="text-sm text-brand-500 mb-6">Choose what you&apos;d like to hear about.</p>
 
           <div className="space-y-4">
             {PREF_LABELS.map(({ key, title, desc }) => (

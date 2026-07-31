@@ -186,7 +186,7 @@ export default function AdminDashboard() {
   if (!data) {
     return (
       <div className="pt-36 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center text-brand-500">
-        Couldn't load analytics data.
+        Couldn&apos;t load analytics data.
       </div>
     )
   }

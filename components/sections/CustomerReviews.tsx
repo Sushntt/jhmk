@@ -2,6 +2,7 @@
 
 import { useRef } from "react"
 import { ChevronLeft, ChevronRight, MessageCircle } from "lucide-react"
+import Image from "next/image"
 import { Reveal } from "@/components/animations/Reveal"
 import { ScrollDots } from "@/components/ui/ScrollDots"
 import { siteConfig } from "@/lib/site-config"
@@ -67,10 +68,12 @@ export function CustomerReviews() {
               // ones past the point of being readable.
               className="snap-start flex-shrink-0 w-[220px] sm:w-[250px] h-[380px] sm:h-[420px] rounded-lg overflow-hidden border border-brand-200 bg-brand-950 grid place-items-center"
             >
-              <img
+              <Image
                 src={src}
                 alt={`Customer message ${i + 1}`}
-                loading="lazy"
+                width={250}
+                height={420}
+                sizes="250px"
                 className="w-full h-full object-contain"
               />
             </div>
