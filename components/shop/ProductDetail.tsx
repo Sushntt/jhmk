@@ -13,11 +13,14 @@ import { Button } from "@/components/ui/Button"
 import { Heart, ShoppingBag, Minus, Plus, Check, ArrowLeft, Truck, Shield, MessageCircle, Maximize2 } from "lucide-react"
 import { ProductCard } from "./ProductCard"
 import { RecentlyViewed } from "./RecentlyViewed"
+import { ProductDescription } from "./ProductDescription"
 import { ImageLightbox } from "./ImageLightbox"
 
 export function ProductDetail({ product, related }: { product: Product; related: Product[] }) {
   const [selectedImage, setSelectedImage] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
+  // Defaults to the first colour so an order always carries one
+  const [selectedColour, setSelectedColour] = useState(product.colours?.[0] || "")
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const { addToCart, setIsOpen: setCartOpen } = useCart()
@@ -25,14 +28,14 @@ export function ProductDetail({ product, related }: { product: Product; related:
 
   const handleAddToCart = () => {
     if (!product.inStock) return
-    addToCart(product, quantity)
+    addToCart(product, quantity, selectedColour || undefined)
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
   }
 
   const handleBuyNow = () => {
     if (!product.inStock) return
-    addToCart(product, quantity)
+    addToCart(product, quantity, selectedColour || undefined)
     setCartOpen(true)
   }
 
@@ -118,7 +121,37 @@ export function ProductDetail({ product, related }: { product: Product; related:
 
             </div>
 
-            <p className="text-brand-600 leading-relaxed mb-8">{product.description}</p>
+            <ProductDescription text={product.description} className="text-brand-600 leading-relaxed mb-8" />
+
+            {/* Colour. Only rendered when the client has filled the Colours
+                field for this product, so pieces that come in one finish don't
+                show a pointless picker. */}
+            {product.colours && product.colours.length > 0 && (
+              <div className="mb-8">
+                <p className="text-sm font-medium text-brand-700 mb-3">
+                  Colour
+                  {selectedColour && (
+                    <span className="text-brand-500 font-normal"> · {selectedColour}</span>
+                  )}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {product.colours.map((colour) => (
+                    <button
+                      key={colour}
+                      onClick={() => setSelectedColour(colour)}
+                      aria-pressed={selectedColour === colour}
+                      className={`px-4 py-2 text-sm rounded-full border transition-colors duration-200 ${
+                        selectedColour === colour
+                          ? "border-brand-900 bg-brand-900 text-white"
+                          : "border-brand-200 text-brand-700 hover:border-brand-400"
+                      }`}
+                    >
+                      {colour}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Quantity */}
             <div className="flex items-center flex-wrap gap-3 sm:gap-4 mb-8">

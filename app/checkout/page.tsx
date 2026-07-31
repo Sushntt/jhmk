@@ -109,7 +109,7 @@ export default function CheckoutPage() {
           couponCode: appliedCoupon?.code || "",
           items: items.map((item) => ({
             productId: item.product.id,
-            name: item.product.name,
+            name: item.colour ? `${item.product.name} (${item.colour})` : item.product.name,
             quantity: item.quantity,
             price: item.product.price,
           })),
@@ -142,7 +142,7 @@ export default function CheckoutPage() {
     const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || siteConfig.whatsappNumber
     const message = generateWhatsAppMessage(
       items.map((item) => ({
-        name: item.product.name,
+        name: item.colour ? `${item.product.name} (${item.colour})` : item.product.name,
         quantity: item.quantity,
         price: item.product.price,
       })),

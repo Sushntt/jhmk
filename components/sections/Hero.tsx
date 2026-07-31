@@ -9,7 +9,9 @@ const ease = [0.22, 1, 0.36, 1] as const
 
 export function Hero() {
   return (
-    <section className="relative h-screen min-h-[600px] flex items-center justify-center overflow-hidden bg-brand-950">
+    // Near-full height on a phone, capped on a laptop - a 100vh hero on a wide
+    // screen pushes every product below the fold.
+    <section className="relative h-[88vh] min-h-[520px] lg:h-[78vh] lg:max-h-[680px] flex items-center justify-center overflow-hidden bg-brand-950">
       {/* Photo fills the frame behind the copy */}
       <motion.div
         initial={{ opacity: 0, scale: 1.05 }}

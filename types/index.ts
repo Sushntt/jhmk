@@ -1,4 +1,6 @@
 export interface Product {
+  /** Comma-separated list from the "Colours" field in Airtable, e.g. "Gold, Rose Gold, Silver" */
+  colours?: string[]
   id: string
   name: string
   slug: string
@@ -21,6 +23,8 @@ export interface Product {
 }
 
 export interface CartItem {
+  /** Chosen colour, when the product offers a choice */
+  colour?: string
   product: Product
   quantity: number
 }

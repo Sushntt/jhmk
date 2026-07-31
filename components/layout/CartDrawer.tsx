@@ -116,7 +116,7 @@ export function CartDrawer() {
                           {item.product.name}
                         </Link>
                         <p className="text-xs text-brand-500 mt-1">
-                          {item.product.material}
+                          {item.colour || item.product.material}
                         </p>
                         <p className="text-sm font-medium text-brand-900 mt-2">
                           {formatPrice(item.product.price)}

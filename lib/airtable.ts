@@ -11,6 +11,9 @@
 //   - Original Price  (Number, optional — shows a strikethrough price when set)
 //   - Images          (Attachment field — upload the product photos here. "Image" also works.)
 //   - Category        (Single select: Necklaces, Bangles, Anklets, Bracelets)
+//   - Colours         (Single line text, optional) -- comma separated, e.g.
+//                     "Gold, Rose Gold, Silver". Shown as a picker on the
+//                     product page; leave blank to hide the picker entirely.
 //   - Subcategory     (Single line text, optional)
 //   - Tags            (Single line text, optional — comma separated, e.g. "gold,minimal")
 //   - Stock           (Number) — this is what drives "OUT OF STOCK"
@@ -163,6 +166,10 @@ function mapProduct(rec: any): Product {
     tags: f["Tags"] ? String(f["Tags"]).split(",").map((t: string) => t.trim()) : [],
     inStock: stockCount > 0,
     stockCount,
+    colours: String(f["Colours"] || "")
+      .split(",")
+      .map((c) => c.trim())
+      .filter(Boolean),
     material: f["Material"] || undefined,
     featured: !!f["Featured"],
     newArrival: !!f["New Arrival"],

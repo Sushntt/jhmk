@@ -5,7 +5,7 @@ import { CartItem, Product } from "@/types"
 
 interface CartContextType {
   items: CartItem[]
-  addToCart: (product: Product, quantity?: number) => void
+  addToCart: (product: Product, quantity?: number, colour?: string) => void
   removeFromCart: (productId: string) => void
   updateQuantity: (productId: string, quantity: number) => void
   clearCart: () => void
@@ -40,18 +40,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isLoaded])
 
-  const addToCart = useCallback((product: Product, quantity = 1) => {
+  const addToCart = useCallback((product: Product, quantity = 1, colour?: string) => {
     setItems((prev) => {
-      const existing = prev.find((item) => item.product.id === product.id)
+      // Same piece in a different colour is a separate line item
+      const existing = prev.find((item) => item.product.id === product.id && item.colour === colour)
       if (existing) {
         const newQty = Math.min(existing.quantity + quantity, product.stockCount)
         return prev.map((item) =>
-          item.product.id === product.id
+          item.product.id === product.id && item.colour === colour
             ? { ...item, quantity: newQty }
             : item
         )
       }
-      return [...prev, { product, quantity: Math.min(quantity, product.stockCount) }]
+      return [...prev, { product, quantity: Math.min(quantity, product.stockCount), colour }]
     })
     setIsOpen(true)
   }, [])

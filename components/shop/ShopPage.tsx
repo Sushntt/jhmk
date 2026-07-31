@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, useRef } from "react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { Product } from "@/types"
 import { ProductCard } from "./ProductCard"
 import { Reveal } from "@/components/animations/Reveal"
@@ -10,6 +10,7 @@ import { Grid3X3, LayoutList } from "lucide-react"
 
 export function ShopPage({ products }: { products: Product[] }) {
   const searchParams = useSearchParams()
+  const gridRef = useRef<HTMLDivElement>(null)
   const [selectedCategory, setSelectedCategory] = useState("All")
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -39,7 +40,29 @@ export function ShopPage({ products }: { products: Product[] }) {
   const [flagFilter, setFlagFilter] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState("featured")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [page, setPage] = useState(1)
+  const router = useRouter()
+  const pathname = usePathname()
+
+  // Page lives in the URL, not in component state. That fixes two things at
+  // once: the browser Back button returns to the page the shopper was on
+  // instead of dumping them at page 1, and the page survives a refresh or a
+  // shared link.
+  const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1)
+
+  const goToPage = (n: number) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (n <= 1) params.delete("page")
+    else params.set("page", String(n))
+
+    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+
+    // Next.js keeps the scroll position on a shallow push, which left people
+    // looking at the bottom of the new page. Take them to the top of the grid.
+    requestAnimationFrame(() => {
+      gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+    })
+  }
+
   const PER_PAGE = 12
 
   const filtered = useMemo(() => {
@@ -72,8 +95,14 @@ export function ShopPage({ products }: { products: Product[] }) {
     return result
   }, [products, selectedCategory, sortBy, searchQuery, flagFilter])
 
+  // Changing a filter invalidates the current page number
   useEffect(() => {
-    setPage(1)
+    if (page > 1 && searchParams.get("page")) {
+      const params = new URLSearchParams(searchParams.toString())
+      params.delete("page")
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategory, sortBy, searchQuery, flagFilter])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
@@ -157,6 +186,8 @@ export function ShopPage({ products }: { products: Product[] }) {
         )}
       </p>
 
+      <div ref={gridRef} className="scroll-mt-32" />
+
       {paginated.length === 0 ? (
         <div className="text-center py-24">
           <p className="text-brand-500 text-lg mb-2">No pieces to show right now</p>
@@ -185,7 +216,7 @@ export function ShopPage({ products }: { products: Product[] }) {
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-16">
           <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            onClick={() => goToPage(Math.max(1, page - 1))}
             disabled={page === 1}
             className="px-3 py-2 text-sm text-brand-700 disabled:opacity-30 disabled:cursor-not-allowed hover:text-brand-900"
           >
@@ -197,7 +228,7 @@ export function ShopPage({ products }: { products: Product[] }) {
               <span key={n} className="flex items-center gap-2">
                 {i > 0 && arr[i - 1] !== n - 1 && <span className="text-brand-300">...</span>}
                 <button
-                  onClick={() => setPage(n)}
+                  onClick={() => goToPage(n)}
                   className={`w-9 h-9 rounded-full text-sm transition-colors ${
                     page === n ? "bg-brand-900 text-white" : "text-brand-700 hover:bg-brand-100"
                   }`}
@@ -207,7 +238,7 @@ export function ShopPage({ products }: { products: Product[] }) {
               </span>
             ))}
           <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            onClick={() => goToPage(Math.min(totalPages, page + 1))}
             disabled={page === totalPages}
             className="px-3 py-2 text-sm text-brand-700 disabled:opacity-30 disabled:cursor-not-allowed hover:text-brand-900"
           >
