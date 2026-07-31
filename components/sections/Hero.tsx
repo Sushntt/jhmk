@@ -19,10 +19,10 @@ const ease = [0.22, 1, 0.36, 1] as const
 export function Hero() {
   return (
     // Starts directly below the fixed header (36px promo bar + 80px navbar).
-    // Sized so the header and hero together fill ~92% of the screen on first
-    // load, matching the proportion on the reference site - measured at 77% of
-    // the viewport for the image band itself.
-    <section className="relative mt-[116px] h-[calc(92vh-116px)] min-h-[460px] lg:h-[calc(90vh-116px)] lg:max-h-[700px] flex items-center overflow-hidden bg-brand-950">
+    // Desktop: the hero fills everything below the header, so the first screen
+    // is entirely the banner. Phones stay slightly short of full height so the
+    // top of the next section peeks in and signals there's more to scroll.
+    <section className="relative mt-[116px] h-[calc(92vh-116px)] min-h-[460px] lg:h-[calc(100vh-116px)] lg:max-h-none flex items-center overflow-hidden bg-brand-950">
       <motion.div
         initial={{ opacity: 0, scale: 1.04 }}
         animate={{ opacity: 1, scale: 1 }}
