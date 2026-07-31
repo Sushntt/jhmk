@@ -8,13 +8,15 @@ import { ChevronDown } from "lucide-react"
 const ease = [0.22, 1, 0.36, 1] as const
 
 /**
- * Two images, chosen by breakpoint.
+ * Two crops of the same studio photograph, chosen by breakpoint.
  *
- * The source photograph is portrait (0.75). A phone hero is roughly 0.79, so it
- * fits almost exactly. A desktop banner is 2.25, which would keep only a third
- * of the frame and crop to a face. So desktop gets a purpose-built wide version
- * where the subject sits right of centre against a blurred extension of the same
- * photo, leaving a dark, low-detail area on the left for the headline.
+ * The shot is landscape (1.50) with the subject right of centre against a dark
+ * backdrop, so the left third is naturally clear for the headline - no blurred
+ * fill or composite needed. Mobile uses a portrait crop of the same frame,
+ * centred on the subject.
+ *
+ * Vertical anchor is 30%: the head sits between 16% and 50% of the frame, and
+ * shorter viewports crop from the top and bottom, so centring would clip it.
  */
 export function Hero() {
   return (
@@ -29,28 +31,28 @@ export function Hero() {
         transition={{ duration: 1.6, ease }}
         className="absolute inset-0"
       >
-        {/* Phone: the original, which already matches the aspect */}
+        {/* Phone: portrait crop */}
         <Image
-          src="/images/hero-model.jpg"
+          src="/images/hero-model-mobile.jpg"
           alt="Model wearing Chinkara jewellery"
           fill
           priority
           sizes="100vw"
-          className="object-cover object-[58%_15%] lg:hidden"
+          className="object-cover object-[center_28%] lg:hidden"
         />
-        {/* Laptop and up: the wide banner */}
+        {/* Laptop and up: the full landscape frame */}
         <Image
           src="/images/hero-banner-wide.jpg"
           alt="Model wearing Chinkara jewellery"
           fill
           priority
           sizes="100vw"
-          className="hidden lg:block object-cover object-center"
+          className="hidden lg:block object-cover object-[center_30%]"
         />
       </motion.div>
 
       {/* Scrim. Even on phones, where the copy sits centred over the subject. */}
-      <div className="absolute inset-0 bg-gradient-to-b from-brand-950/50 via-brand-950/55 to-brand-950/45 lg:bg-gradient-to-r lg:from-brand-950/75 lg:via-brand-950/35 lg:to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-b from-brand-950/45 via-brand-950/35 to-brand-950/50 lg:bg-gradient-to-r lg:from-brand-950/55 lg:via-brand-950/15 lg:to-transparent" />
 
       <div className="relative z-10 w-full px-6 sm:px-10 lg:px-16">
         {/* Centred on a phone; left-aligned on desktop, where the subject sits
