@@ -6,6 +6,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { Product } from "@/types"
 import { ProductCard } from "./ProductCard"
 import { Reveal } from "@/components/animations/Reveal"
+import { toCardProducts } from "@/lib/variants"
 import { Grid3X3, LayoutList } from "lucide-react"
 
 export function ShopPage({ products }: { products: Product[] }) {
@@ -92,12 +93,30 @@ export function ShopPage({ products }: { products: Product[] }) {
       case "bestseller": result.sort((a, b) => (b.bestseller ? 1 : 0) - (a.bestseller ? 1 : 0)); break
     }
 
-    return result
+    // Collapse colour variants so a piece in three colours is one card
+    return toCardProducts(result)
   }, [products, selectedCategory, sortBy, searchQuery, flagFilter])
 
-  // Changing a filter invalidates the current page number
+  // Changing a filter invalidates the current page number.
+  //
+  // This must NOT run on mount. useEffect always fires once, so the previous
+  // version stripped ?page=3 the instant someone arrived on that URL - which is
+  // exactly what happened when a shopper opened a product from page 3 and hit
+  // Back. The ref makes the first run a no-op and records the filter values, so
+  // only a genuine change afterwards resets the page.
+  const lastFilters = useRef<string | null>(null)
+
   useEffect(() => {
-    if (page > 1 && searchParams.get("page")) {
+    const signature = JSON.stringify([selectedCategory, sortBy, searchQuery, flagFilter])
+
+    if (lastFilters.current === null) {
+      lastFilters.current = signature
+      return
+    }
+    if (lastFilters.current === signature) return
+    lastFilters.current = signature
+
+    if (searchParams.get("page")) {
       const params = new URLSearchParams(searchParams.toString())
       params.delete("page")
       router.replace(`${pathname}?${params.toString()}`, { scroll: false })

@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { Product } from "@/types"
 import { isAirtableConfigured, getProducts as getAirtableProducts } from "@/lib/airtable"
 import { mockProducts } from "@/lib/mock-data"
@@ -9,7 +10,19 @@ import { mockProducts } from "@/lib/mock-data"
 // before Airtable is wired up.
 const allowDemoFallback = process.env.NODE_ENV !== "production"
 
-export async function getAllProducts(): Promise<Product[]> {
+/**
+ * Loads every product, de-duplicated per request.
+ *
+ * The homepage renders Categories, New Arrivals and Best Sellers, and each one
+ * needs the full product list. Without this, that was three or four separate
+ * Airtable round-trips per page view - all sequential, all before anything
+ * rendered, which is what made the site feel slow.
+ *
+ * React's cache() memoises for the lifetime of a single request, so those calls
+ * collapse into one. It does NOT cache across visitors, so stock levels stay
+ * live - important, since the client relies on stock being accurate.
+ */
+export const getAllProducts = cache(async function getAllProducts(): Promise<Product[]> {
   if (!isAirtableConfigured) {
     if (allowDemoFallback) return mockProducts
     console.error("Airtable is not configured in production - returning no products.")
@@ -26,9 +39,11 @@ export async function getAllProducts(): Promise<Product[]> {
     console.error("Failed to load live products from Airtable:", err)
     return allowDemoFallback ? mockProducts : []
   }
-}
+})
 
-export async function getProductBySlug(slug: string): Promise<Product | null> {
+export const getProductBySlug = cache(async function getProductBySlug(
+  slug: string
+): Promise<Product | null> {
   const products = await getAllProducts()
   return products.find((p) => p.slug === slug) || null
-}
+})

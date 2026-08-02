@@ -1,4 +1,4 @@
-import { Product, FAQItem, Order, User } from "@/types"
+import { Product, Order } from "@/types"
 
 export const mockProducts: Product[] = [
   {
@@ -279,15 +279,6 @@ export const mockProducts: Product[] = [
   },
 ]
 
-export const mockCategories = [
-  "All",
-  "Necklaces",
-  "Bangles",
-  "Anklets",
-  "Bracelets",
-]
-
-
 export const mockOrders: Order[] = [
   {
     id: "ORD-001",
@@ -341,35 +332,5 @@ export const mockOrders: Order[] = [
     total: 51000,
     status: "delivered",
     createdAt: "2024-02-10T10:00:00Z",
-  },
-]
-
-export const mockUsers: User[] = [
-  {
-    id: "user1",
-    email: "priya.sharma@email.com",
-    name: "Priya Sharma",
-    photoURL: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80",
-    wishlist: ["rec2", "rec5", "rec9"],
-    orders: ["ORD-001", "ORD-002", "ORD-005"],
-    createdAt: "2024-01-01T10:00:00Z",
-  },
-  {
-    id: "user2",
-    email: "arjun.patel@email.com",
-    name: "Arjun Patel",
-    photoURL: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80",
-    wishlist: ["rec3", "rec7"],
-    orders: ["ORD-003"],
-    createdAt: "2024-02-15T10:00:00Z",
-  },
-  {
-    id: "user3",
-    email: "meera.reddy@email.com",
-    name: "Meera Reddy",
-    photoURL: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80",
-    wishlist: ["rec10", "rec11"],
-    orders: ["ORD-004"],
-    createdAt: "2024-03-01T10:00:00Z",
   },
 ]

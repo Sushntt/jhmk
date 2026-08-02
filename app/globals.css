@@ -50,6 +50,13 @@
     animation: none !important;
     transform: none !important;
   }
+
+  /* The product-card hover lift is now a CSS transform rather than a Framer
+     Motion animation, so shortening the transition isn't enough - the movement
+     itself has to go for anyone who asked not to see motion. */
+  .group:hover {
+    transform: none !important;
+  }
 }
 
 /* Hover motion is gated so a tap on touch devices doesn't fire a stuck

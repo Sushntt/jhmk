@@ -1,6 +1,8 @@
 export interface Product {
-  /** Comma-separated list from the "Colours" field in Airtable, e.g. "Gold, Rose Gold, Silver" */
-  colours?: string[]
+  /** Single value from the "Colour" field in Airtable, e.g. "Rose Gold".
+   *  Rows sharing a name but differing in Colour are grouped into one product
+   *  on the site, each keeping its own stock, price and photos. */
+  colour?: string
   id: string
   name: string
   slug: string

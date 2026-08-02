@@ -10,32 +10,64 @@ import { useCart } from "@/hooks/useCart"
 import { useWishlist } from "@/hooks/useWishlist"
 import { Reveal } from "@/components/animations/Reveal"
 import { Button } from "@/components/ui/Button"
-import { Heart, ShoppingBag, Minus, Plus, Check, ArrowLeft, Truck, Shield, MessageCircle, Maximize2 } from "lucide-react"
+import { Heart, ShoppingBag, Minus, Plus, Check, Truck, Shield, MessageCircle, Maximize2 } from "lucide-react"
 import { ProductCard } from "./ProductCard"
 import { RecentlyViewed } from "./RecentlyViewed"
 import { ProductDescription } from "./ProductDescription"
 import { ImageLightbox } from "./ImageLightbox"
 
-export function ProductDetail({ product, related }: { product: Product; related: Product[] }) {
+export function ProductDetail({
+  product,
+  variants = [],
+  related,
+}: {
+  product: Product
+  /** Every Airtable row sharing this name - one per colour */
+  variants?: Product[]
+  related: Product[]
+}) {
+  // The colour list, ordered so it stays stable as stock changes
+  const colourVariants = (variants.length > 0 ? variants : [product]).filter((v) => v.colour)
+  const hasColours = colourVariants.length > 1
+
+  // Everything on this page reads from the ACTIVE variant, not the one in the
+  // URL - so switching colour swaps photos, price and stock with no reload.
+  const [activeId, setActiveId] = useState(product.id)
+  const active = (variants.length > 0 ? variants : [product]).find((v) => v.id === activeId) || product
+
   const [selectedImage, setSelectedImage] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
-  // Defaults to the first colour so an order always carries one
-  const [selectedColour, setSelectedColour] = useState(product.colours?.[0] || "")
+  /**
+   * Switching colour swaps to that Airtable row: its own photos, price and
+   * stock. The image index resets to 0 because the new colour has a different
+   * photo set. The URL is updated without a navigation so the page can be
+   * shared or refreshed on the chosen colour.
+   */
+  const handleSelectColour = (variant: Product) => {
+    setActiveId(variant.id)
+    setSelectedImage(0)
+    setQuantity(1)
+    if (typeof window !== "undefined" && variant.slug) {
+      window.history.replaceState(null, "", `/shop/${variant.slug}`)
+    }
+  }
+
+  const handleSelectImage = (i: number) => setSelectedImage(i)
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const { addToCart, setIsOpen: setCartOpen } = useCart()
   const { toggleWishlist, isInWishlist } = useWishlist()
 
   const handleAddToCart = () => {
-    if (!product.inStock) return
-    addToCart(product, quantity, selectedColour || undefined)
+    if (!active.inStock) return
+    addToCart(active, quantity, active.colour)
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
   }
 
   const handleBuyNow = () => {
-    if (!product.inStock) return
-    addToCart(product, quantity, selectedColour || undefined)
+    if (!active.inStock) return
+    addToCart(active, quantity, active.colour)
     setCartOpen(true)
   }
 
@@ -64,7 +96,7 @@ export function ProductDetail({ product, related }: { product: Product; related:
               className="group relative block w-full aspect-square bg-brand-100 rounded-lg overflow-hidden cursor-zoom-in"
             >
               <Image
-                src={product.images[selectedImage]}
+                src={active.images[selectedImage]}
                 alt={product.name}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
@@ -78,12 +110,12 @@ export function ProductDetail({ product, related }: { product: Product; related:
 
             {/* Thumbnails scroll horizontally - a product with six images would
                 otherwise wrap and push the buy button below the fold. */}
-            {product.images.length > 1 && (
+            {active.images.length > 1 && (
               <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
-                {product.images.map((img, i) => (
+                {active.images.map((img, i) => (
                   <button
                     key={i}
-                    onClick={() => setSelectedImage(i)}
+                    onClick={() => handleSelectImage(i)}
                     aria-label={`View image ${i + 1}`}
                     className={`relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-colors ${
                       selectedImage === i ? "border-gold-500" : "border-transparent hover:border-brand-300"
@@ -104,16 +136,16 @@ export function ProductDetail({ product, related }: { product: Product; related:
             <h1 className="text-3xl md:text-4xl font-serif text-brand-900 mb-4">{product.name}</h1>
 
             <div className="flex items-center gap-3 mb-6">
-              <span className="text-2xl font-medium text-brand-900">{formatPrice(product.price)}</span>
-              {product.originalPrice && (
-                <span className="text-lg text-brand-400 line-through">{formatPrice(product.originalPrice)}</span>
+              <span className="text-2xl font-medium text-brand-900">{formatPrice(active.price)}</span>
+              {active.originalPrice && (
+                <span className="text-lg text-brand-400 line-through">{formatPrice(active.originalPrice)}</span>
               )}
-              {product.originalPrice && (
+              {active.originalPrice && (
                 <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">
-                  {Math.round((1 - product.price / product.originalPrice) * 100)}% off
+                  {Math.round((1 - active.price / active.originalPrice) * 100)}% off
                 </span>
               )}
-              {!product.inStock && (
+              {!active.inStock && (
                 <span className="px-2 py-1 bg-spice-100 text-spice-700 text-xs font-medium tracking-wide rounded">
                   OUT OF STOCK
                 </span>
@@ -121,34 +153,40 @@ export function ProductDetail({ product, related }: { product: Product; related:
 
             </div>
 
-            <ProductDescription text={product.description} className="text-brand-600 leading-relaxed mb-8" />
+            <ProductDescription text={active.description} className="text-brand-600 leading-relaxed mb-8" />
 
-            {/* Colour. Only rendered when the client has filled the Colours
-                field for this product, so pieces that come in one finish don't
-                show a pointless picker. */}
-            {product.colours && product.colours.length > 0 && (
+            {/* Colour. Each button is a separate Airtable row with its own
+                stock, price and photos, so a sold-out colour is shown as
+                unavailable rather than hidden - the customer can still see it
+                exists and ask about it. */}
+            {hasColours && (
               <div className="mb-8">
                 <p className="text-sm font-medium text-brand-700 mb-3">
                   Colour
-                  {selectedColour && (
-                    <span className="text-brand-500 font-normal"> · {selectedColour}</span>
+                  {active.colour && (
+                    <span className="text-brand-500 font-normal"> · {active.colour}</span>
                   )}
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {product.colours.map((colour) => (
-                    <button
-                      key={colour}
-                      onClick={() => setSelectedColour(colour)}
-                      aria-pressed={selectedColour === colour}
-                      className={`px-4 py-2 text-sm rounded-full border transition-colors duration-200 ${
-                        selectedColour === colour
-                          ? "border-brand-900 bg-brand-900 text-white"
-                          : "border-brand-200 text-brand-700 hover:border-brand-400"
-                      }`}
-                    >
-                      {colour}
-                    </button>
-                  ))}
+                  {colourVariants.map((variant) => {
+                    const isActive = variant.id === active.id
+                    return (
+                      <button
+                        key={variant.id}
+                        onClick={() => handleSelectColour(variant)}
+                        aria-pressed={isActive}
+                        className={`px-4 py-2 text-sm rounded-full border transition-colors duration-200 ${
+                          isActive
+                            ? "border-brand-900 bg-brand-900 text-white"
+                            : variant.inStock
+                            ? "border-brand-200 text-brand-700 hover:border-brand-400"
+                            : "border-brand-200 text-brand-400 line-through"
+                        }`}
+                      >
+                        {variant.colour}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             )}
@@ -159,15 +197,15 @@ export function ProductDetail({ product, related }: { product: Product; related:
               <div className="flex items-center border border-brand-200 rounded-lg">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  disabled={!product.inStock}
+                  disabled={!active.inStock}
                   className="p-3 hover:bg-brand-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <Minus className="w-4 h-4" />
                 </button>
                 <span className="w-12 text-center text-sm font-medium">{quantity}</span>
                 <button
-                  onClick={() => setQuantity(Math.min(product.stockCount, quantity + 1))}
-                  disabled={!product.inStock}
+                  onClick={() => setQuantity(Math.min(active.stockCount, quantity + 1))}
+                  disabled={!active.inStock}
                   className="p-3 hover:bg-brand-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <Plus className="w-4 h-4" />
@@ -178,11 +216,11 @@ export function ProductDetail({ product, related }: { product: Product; related:
                   decision - the shopper is choosing how many right now. Wording
                   adapts because "only 1 available" reads awkwardly for a piece
                   Chinkara only ever stocks one of. */}
-              {product.inStock && product.stockCount > 0 && product.stockCount < 3 && (
+              {active.inStock && active.stockCount > 0 && active.stockCount < 3 && (
                 <span className="text-sm text-gold-700 font-medium">
-                  {product.stockCount === 1
+                  {active.stockCount === 1
                     ? "Last one available"
-                    : `Only ${product.stockCount} left`}
+                    : `Only ${active.stockCount} left`}
                 </span>
               )}
             </div>
@@ -191,12 +229,12 @@ export function ProductDetail({ product, related }: { product: Product; related:
             <div className="flex gap-4 mb-8">
               <Button
                 onClick={handleAddToCart}
-                disabled={!product.inStock}
+                disabled={!active.inStock}
                 className="flex-1"
                 size="lg"
               >
                 <AnimatePresence mode="wait">
-                  {!product.inStock ? (
+                  {!active.inStock ? (
                     <motion.span key="oos" className="flex items-center gap-2">
                       Out of Stock
                     </motion.span>
@@ -229,18 +267,18 @@ export function ProductDetail({ product, related }: { product: Product; related:
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => toggleWishlist(product)}
+                onClick={() => toggleWishlist(active)}
                 className={`p-4 rounded-lg border-2 transition-colors ${
-                  isInWishlist(product.id)
+                  isInWishlist(active.id)
                     ? "border-red-400 bg-red-50 text-red-500"
                     : "border-brand-200 hover:border-brand-400 text-brand-700"
                 }`}
               >
-                <Heart className={`w-5 h-5 ${isInWishlist(product.id) ? "fill-red-500" : ""}`} />
+                <Heart className={`w-5 h-5 ${isInWishlist(active.id) ? "fill-red-500" : ""}`} />
               </motion.button>
             </div>
 
-            {product.inStock && (
+            {active.inStock && (
               <button
                 onClick={handleBuyNow}
                 className="w-full mb-8 -mt-4 py-4 rounded-lg border-2 border-brand-900 text-brand-900 font-medium tracking-wide uppercase text-sm hover:bg-brand-900 hover:text-white transition-colors"
@@ -283,11 +321,11 @@ export function ProductDetail({ product, related }: { product: Product; related:
         </div>
       )}
 
-      <RecentlyViewed currentProductId={product.id} />
+      <RecentlyViewed currentProductId={active.id} />
 
       {lightboxOpen && (
         <ImageLightbox
-          images={product.images}
+          images={active.images}
           index={selectedImage}
           alt={product.name}
           onClose={() => setLightboxOpen(false)}

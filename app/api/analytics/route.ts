@@ -118,6 +118,11 @@ function computeAnalytics(allOrders: AirtableOrderRecord[]) {
   return {
     revenue: totalRevenue,
     orders: totalOrders,
+    // Surfaced so the dashboard can show what still needs confirming - these
+    // were being computed and then thrown away.
+    pendingOrders,
+    pendingRevenue,
+    cancelledOrders,
     customers: totalCustomers,
     repeatCustomers,
     avgOrderValue,

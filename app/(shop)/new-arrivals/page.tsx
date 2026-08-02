@@ -2,6 +2,7 @@ import Link from "next/link"
 import { getAllProducts } from "@/lib/data"
 import { ProductCard } from "@/components/shop/ProductCard"
 import { Reveal } from "@/components/animations/Reveal"
+import { toCardProducts } from "@/lib/variants"
 import { Button } from "@/components/ui/Button"
 import { Sparkles } from "lucide-react"
 
@@ -18,9 +19,11 @@ export default async function NewArrivalsPage() {
   // ONLY products with the "New Arrival" checkbox ticked in Airtable - the page
   // has to match the NEW badge on the cards, otherwise ticking the box means
   // nothing. Newest first within that set.
-  const list = products
-    .filter((p) => p.newArrival)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  const list = toCardProducts(
+    products
+      .filter((p) => p.newArrival)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  )
 
   return (
     <div className="pt-32 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
@@ -55,10 +58,13 @@ export default async function NewArrivalsPage() {
       ) : (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-            {list.map((product, i) => (
-              <Reveal key={product.id} delay={Math.min(i * 0.04, 0.3)}>
-                <ProductCard product={product} />
-              </Reveal>
+            {/* No per-card Reveal here. Each ProductCard already contains six
+                motion elements, so wrapping 24 of them added 24 more
+                IntersectionObservers and animated components to a single page -
+                enough to make scrolling stutter on a mid-range phone for a
+                stagger nobody notices. */}
+            {list.map((product) => (
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
 

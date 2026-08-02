@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { motion } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
 import { Heart, ShoppingBag } from "lucide-react"
@@ -18,7 +17,11 @@ export function ProductCard({ product }: { product: Product }) {
   const saved = isInWishlist(product.id)
 
   return (
-    <motion.div className="group" whileHover={{ y: -4 }} transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}>
+    // Hover lift, press feedback and icon reveals are all plain CSS here.
+    // Framer Motion was creating six animated components per card; on a grid of
+    // 24 that is 144 React-driven animations, which is what made scrolling
+    // stutter. CSS transforms composite on the GPU and cost nothing in JS.
+    <div className="group transition-transform duration-200 ease-out [@media(hover:hover)]:hover:-translate-y-1">
       <Link href={`/shop/${product.slug}`}>
         <div className="relative aspect-[3/4] bg-brand-100 rounded-lg overflow-hidden mb-3">
           <Image
@@ -57,30 +60,28 @@ export function ProductCard({ product }: { product: Product }) {
               Always visible on touch; on pointer devices they fade in, since a
               permanent overlay competes with the product photo. */}
           <div className="absolute top-2 right-2 flex flex-col gap-2 transition-opacity duration-200 ease-out [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100">
-            <motion.button
-              whileTap={{ scale: 0.9 }}
+            <button
               onClick={(e) => {
                 e.preventDefault()
                 toggleWishlist(product)
               }}
               aria-label={saved ? `Remove ${product.name} from wishlist` : `Save ${product.name} to wishlist`}
-              className="grid place-items-center w-9 h-9 rounded-full bg-surface/95 shadow-sm hover:bg-surface transition-colors"
+              className="grid place-items-center w-9 h-9 rounded-full bg-surface/95 shadow-sm hover:bg-surface transition-[background-color,transform] duration-150 active:scale-90"
             >
               <Heart className={`w-4 h-4 ${saved ? "fill-spice-500 text-spice-500" : "text-brand-700"}`} />
-            </motion.button>
+            </button>
 
-            <motion.button
-              whileTap={product.inStock ? { scale: 0.9 } : undefined}
+            <button
               onClick={(e) => {
                 e.preventDefault()
                 if (product.inStock) addToCart(product)
               }}
               disabled={!product.inStock}
               aria-label={product.inStock ? `Add ${product.name} to bag` : `${product.name} is sold out`}
-              className="grid place-items-center w-9 h-9 rounded-full bg-surface/95 shadow-sm hover:bg-brand-900 hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-surface/95 disabled:hover:text-brand-700 text-brand-700"
+              className="grid place-items-center w-9 h-9 rounded-full bg-surface/95 shadow-sm hover:bg-brand-900 hover:text-white transition-[background-color,color,transform] duration-150 active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:bg-surface/95 disabled:hover:text-brand-700 text-brand-700"
             >
               <ShoppingBag className="w-4 h-4" />
-            </motion.button>
+            </button>
           </div>
         </div>
       </Link>
@@ -102,6 +103,6 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }

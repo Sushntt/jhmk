@@ -11,9 +11,11 @@
 //   - Original Price  (Number, optional — shows a strikethrough price when set)
 //   - Images          (Attachment field — upload the product photos here. "Image" also works.)
 //   - Category        (Single select: Necklaces, Bangles, Anklets, Bracelets)
-//   - Colours         (Single line text, optional) -- comma separated, e.g.
-//                     "Gold, Rose Gold, Silver". Shown as a picker on the
-//                     product page; leave blank to hide the picker entirely.
+//   - Colour          (Single select, optional) -- ONE colour per row. To sell a
+//                     piece in several colours, create one row per colour with
+//                     the SAME Name. The site groups them into a single product
+//                     with colour buttons, and each row keeps its own stock,
+//                     price and photos. Leave blank for single-colour pieces.
 //   - Subcategory     (Single line text, optional)
 //   - Tags            (Single line text, optional — comma separated, e.g. "gold,minimal")
 //   - Stock           (Number) — this is what drives "OUT OF STOCK"
@@ -166,10 +168,7 @@ function mapProduct(rec: any): Product {
     tags: f["Tags"] ? String(f["Tags"]).split(",").map((t: string) => t.trim()) : [],
     inStock: stockCount > 0,
     stockCount,
-    colours: String(f["Colours"] || "")
-      .split(",")
-      .map((c) => c.trim())
-      .filter(Boolean),
+    colour: String(f["Colour"] || "").trim() || undefined,
     material: f["Material"] || undefined,
     featured: !!f["Featured"],
     newArrival: !!f["New Arrival"],
@@ -411,4 +410,56 @@ export async function checkStock(items: StockCheckItem[]): Promise<StockCheckRes
   }
 
   return results
+}
+
+
+/**
+ * Resolves order-line names back to product record IDs.
+ *
+ * The Items column is stored in readable form for the client's benefit, so it
+ * carries the product NAME but not its record id. Stock sync needs the id.
+ *
+ * Checkout writes colour variants as "Laya (Rose Gold)", and variants share a
+ * name, so the colour in brackets is what distinguishes them - it is matched on
+ * name + colour first, then name alone for single-colour pieces.
+ *
+ * If a line matches zero rows, or is ambiguous between several, NOTHING is
+ * returned for it. Guessing would deduct stock from the wrong colour, which is
+ * worse than deducting none and reporting it.
+ */
+export async function resolveProductIdsByName(
+  names: string[]
+): Promise<Map<string, string | null>> {
+  const out = new Map<string, string | null>()
+  if (!isAirtableConfigured || names.length === 0) return out
+
+  const products = await getProducts()
+  const norm = (v: string) => v.trim().toLowerCase().replace(/\s+/g, " ")
+
+  // Two indexes: exact name+colour, and name alone
+  const byNameColour = new Map<string, string[]>()
+  const byName = new Map<string, string[]>()
+
+  for (const p of products) {
+    const n = norm(p.name)
+    byName.set(n, [...(byName.get(n) || []), p.id])
+    if (p.colour) {
+      const k = `${n}|${norm(p.colour)}`
+      byNameColour.set(k, [...(byNameColour.get(k) || []), p.id])
+    }
+  }
+
+  for (const raw of names) {
+    const m = raw.match(/^(.*?)\s*\(([^)]*)\)\s*$/)
+    const baseName = norm(m ? m[1] : raw)
+    const colour = m ? norm(m[2]) : ""
+
+    let matches: string[] = []
+    if (colour) matches = byNameColour.get(`${baseName}|${colour}`) || []
+    if (matches.length === 0) matches = byName.get(baseName) || []
+
+    out.set(raw, matches.length === 1 ? matches[0] : null)
+  }
+
+  return out
 }

@@ -4,6 +4,7 @@ import {
   getOrders,
   decrementStock,
   markStockDeducted,
+  resolveProductIdsByName,
 } from "@/lib/airtable"
 
 export const dynamic = "force-dynamic"
@@ -69,19 +70,34 @@ async function run(request: Request) {
       errors?: string[]
     }[] = []
 
+    // The Items column stores readable text rather than raw JSON, so line items
+    // carry a name but no record id. Resolve them in one pass for every order
+    // about to be processed.
+    const allNames = pending.flatMap((o) => o.items.filter((i) => !i.productId).map((i) => i.name))
+    const resolved = await resolveProductIdsByName(allNames)
+
     for (const order of pending) {
-      const withIds = order.items.filter((i) => i.productId)
+      const withIds = order.items
+        .map((i) => ({ ...i, productId: i.productId || resolved.get(i.name) || undefined }))
+        .filter((i) => i.productId)
+
+      const unresolved = order.items.filter(
+        (i) => !i.productId && !resolved.get(i.name)
+      )
 
       if (withIds.length === 0) {
-        // Legacy orders written before productId was stored can't be matched to
-        // a product record. Tick the flag anyway so they don't retry forever.
-        await markStockDeducted(order.id)
+        // Nothing could be matched. Do NOT mark as done - leaving the flag clear
+        // means it retries once the product name is corrected, rather than
+        // silently losing the deduction forever.
         processed.push({
           orderId: order.id,
           customer: order.customerName,
           items: 0,
-          ok: true,
-          errors: ["No productId on items - nothing to deduct, marked as done"],
+          ok: false,
+          errors: unresolved.map(
+            (i) =>
+              `Could not match "${i.name}" to a product - check the name still exists in the Products table and is unique`
+          ),
         })
         continue
       }
@@ -89,18 +105,23 @@ async function run(request: Request) {
       const results = await decrementStock(withIds)
       const failed = results.filter((r) => !r.ok)
 
-      // Only tick the flag when every item went through, so a partial failure
-      // gets retried on the next run instead of being silently lost.
-      if (failed.length === 0) {
+      // Only tick the flag when every line resolved AND deducted, so a partial
+      // failure retries next run instead of being silently lost.
+      if (failed.length === 0 && unresolved.length === 0) {
         await markStockDeducted(order.id)
       }
+
+      const errors = [
+        ...failed.map((f) => `${f.productId}: ${f.error}`),
+        ...unresolved.map((i) => `Could not match "${i.name}" to a product`),
+      ]
 
       processed.push({
         orderId: order.id,
         customer: order.customerName,
         items: results.length,
-        ok: failed.length === 0,
-        errors: failed.length > 0 ? failed.map((f) => `${f.productId}: ${f.error}`) : undefined,
+        ok: failed.length === 0 && unresolved.length === 0,
+        errors: errors.length > 0 ? errors : undefined,
       })
     }
 
