@@ -8,9 +8,13 @@ import { useCart } from "@/hooks/useCart"
 import { formatPrice } from "@/lib/utils"
 import { X, Heart, ShoppingBag, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/Button"
+import { useBackToClose } from "@/hooks/useBackToClose"
 
 export function WishlistDrawer() {
   const { items, isOpen, setIsOpen, removeFromWishlist } = useWishlist()
+
+  // Back gesture on a phone closes the drawer instead of leaving the shop
+  useBackToClose(isOpen, () => setIsOpen(false))
   const { addToCart } = useCart()
 
   const handleAddToCart = (product: typeof items[0]) => {

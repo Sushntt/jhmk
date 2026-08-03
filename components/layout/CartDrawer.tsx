@@ -9,10 +9,14 @@ import { useCart } from "@/hooks/useCart"
 import { formatPrice } from "@/lib/utils"
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/Button"
+import { useBackToClose } from "@/hooks/useBackToClose"
 import { Product } from "@/types"
 
 export function CartDrawer() {
   const { items, isOpen, setIsOpen, removeFromCart, updateQuantity, totalPrice, addToCart } = useCart()
+
+  // Back gesture on a phone closes the drawer instead of leaving the shop
+  useBackToClose(isOpen, () => setIsOpen(false))
   const router = useRouter()
   const [deals, setDeals] = useState<Product[]>([])
 

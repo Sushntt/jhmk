@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect, useRef } from "react"
+import { useState, useMemo, useRef } from "react"
 import Link from "next/link"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { Product } from "@/types"
@@ -12,34 +12,36 @@ import { Grid3X3, LayoutList } from "lucide-react"
 export function ShopPage({ products }: { products: Product[] }) {
   const searchParams = useSearchParams()
   const gridRef = useRef<HTMLDivElement>(null)
-  const [selectedCategory, setSelectedCategory] = useState("All")
-  const [searchQuery, setSearchQuery] = useState("")
 
   const categories = useMemo(
     () => ["All", ...Array.from(new Set(products.map((p) => p.category))).sort()],
     [products]
   )
 
-  useEffect(() => {
-    const category = searchParams.get("category")
-    if (category && categories.includes(category)) {
-      setSelectedCategory(category)
-    }
-    const search = searchParams.get("search")
-    if (search) {
-      setSearchQuery(search)
-    }
-    const sort = searchParams.get("sort")
-    if (sort) {
-      setSortBy(sort)
-    }
-    // ?filter=bestseller / ?filter=new narrow the list rather than just
-    // reordering it, so "View all" from those sections shows what it promises.
-    setFlagFilter(searchParams.get("filter"))
-  }, [searchParams, categories])
+  // Category, sort and search all live in the URL alongside the page number.
+  //
+  // They were previously local state, so choosing "Price: Low to High" never
+  // changed the address. Pressing Back from a product then returned to a plain
+  // /shop and the filter appeared to reset. Reading them from the URL means the
+  // browser restores them for free, and a filtered view can be shared.
+  const selectedCategory = (() => {
+    const c = searchParams.get("category")
+    return c && categories.includes(c) ? c : "All"
+  })()
+  const sortBy = searchParams.get("sort") || "featured"
+  const searchQuery = searchParams.get("search") || ""
+  const flagFilter = searchParams.get("filter")
 
-  const [flagFilter, setFlagFilter] = useState<string | null>(null)
-  const [sortBy, setSortBy] = useState("featured")
+  /** Writes a filter to the URL and drops the page number, since page 3 of the
+   *  old filter is meaningless under the new one. */
+  const setParam = (key: string, value: string | null) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (!value || value === "All" || value === "featured") params.delete(key)
+    else params.set(key, value)
+    params.delete("page")
+    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+  }
+
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const router = useRouter()
   const pathname = usePathname()
@@ -97,32 +99,9 @@ export function ShopPage({ products }: { products: Product[] }) {
     return toCardProducts(result)
   }, [products, selectedCategory, sortBy, searchQuery, flagFilter])
 
-  // Changing a filter invalidates the current page number.
-  //
-  // This must NOT run on mount. useEffect always fires once, so the previous
-  // version stripped ?page=3 the instant someone arrived on that URL - which is
-  // exactly what happened when a shopper opened a product from page 3 and hit
-  // Back. The ref makes the first run a no-op and records the filter values, so
-  // only a genuine change afterwards resets the page.
-  const lastFilters = useRef<string | null>(null)
+  // No page-reset effect needed: setParam() clears "page" whenever a filter
+  // changes, and the URL is the single source of truth for both.
 
-  useEffect(() => {
-    const signature = JSON.stringify([selectedCategory, sortBy, searchQuery, flagFilter])
-
-    if (lastFilters.current === null) {
-      lastFilters.current = signature
-      return
-    }
-    if (lastFilters.current === signature) return
-    lastFilters.current = signature
-
-    if (searchParams.get("page")) {
-      const params = new URLSearchParams(searchParams.toString())
-      params.delete("page")
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCategory, sortBy, searchQuery, flagFilter])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE)
@@ -148,7 +127,7 @@ export function ShopPage({ products }: { products: Product[] }) {
           {categories.map((cat) => (
             <button
               key={cat}
-              onClick={() => setSelectedCategory(cat)}
+              onClick={() => setParam("category", cat)}
               className={`px-4 py-2 text-sm tracking-wide transition-colors duration-200 rounded-full ${
                 selectedCategory === cat
                   ? "bg-brand-900 text-white"
@@ -163,7 +142,7 @@ export function ShopPage({ products }: { products: Product[] }) {
         <div className="flex items-center gap-4">
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
+            onChange={(e) => setParam("sort", e.target.value)}
             className="bg-transparent text-sm text-brand-700 border-b border-brand-300 pb-1 focus:outline-none focus:border-brand-900"
           >
             <option value="featured">Featured</option>
@@ -196,7 +175,7 @@ export function ShopPage({ products }: { products: Product[] }) {
           <>
             {" "}for &quot;{searchQuery}&quot;
             <button
-              onClick={() => setSearchQuery("")}
+              onClick={() => setParam("search", null)}
               className="ml-2 text-brand-900 underline hover:no-underline"
             >
               Clear

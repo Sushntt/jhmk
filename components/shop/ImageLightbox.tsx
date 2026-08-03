@@ -4,6 +4,7 @@ import { useEffect, useCallback } from "react"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, ChevronLeft, ChevronRight } from "lucide-react"
+import { useBackToClose } from "@/hooks/useBackToClose"
 
 interface Props {
   images: string[]
@@ -14,6 +15,9 @@ interface Props {
 }
 
 export function ImageLightbox({ images, index, alt, onClose, onIndexChange }: Props) {
+  // The lightbox only renders when open, so it is always "open" here
+  useBackToClose(true, onClose)
+
   const next = useCallback(
     () => onIndexChange((index + 1) % images.length),
     [index, images.length, onIndexChange]
