@@ -3,6 +3,8 @@ export interface Product {
    *  Rows sharing a name but differing in Colour are grouped into one product
    *  on the site, each keeping its own stock, price and photos. */
   colour?: string
+  /** Set only on grouped grid cards: every colour this piece comes in. */
+  variantColours?: string[]
   id: string
   name: string
   slug: string

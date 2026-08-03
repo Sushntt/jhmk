@@ -52,11 +52,18 @@ export function groupVariants(products: Product[]): ProductGroup[] {
  * still reads as available.
  */
 export function toCardProducts(products: Product[]): Product[] {
-  return groupVariants(products).map((g) => ({
-    ...g.primary,
-    inStock: g.inStock,
-    stockCount: g.totalStock,
-  }))
+  return groupVariants(products).map((g) => {
+    // Distinct colours across the group, for the "3 colours" hint on the card
+    const colours = Array.from(
+      new Set(g.variants.map((v) => v.colour).filter(Boolean) as string[])
+    )
+    return {
+      ...g.primary,
+      inStock: g.inStock,
+      stockCount: g.totalStock,
+      variantColours: colours,
+    }
+  })
 }
 
 /** All rows sharing a name with the given product, for the product page. */

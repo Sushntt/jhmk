@@ -28,7 +28,11 @@ export function ProductDetail({
 }) {
   // The colour list, ordered so it stays stable as stock changes
   const colourVariants = (variants.length > 0 ? variants : [product]).filter((v) => v.colour)
-  const hasColours = colourVariants.length > 1
+  // More than one row sharing the name = a real choice, so show buttons.
+  // Exactly one = show the colour as a plain label, since the customer still
+  // wants to know what they're buying even when there's nothing to pick.
+  const hasColourChoice = colourVariants.length > 1
+  const singleColour = colourVariants.length === 1 ? colourVariants[0].colour : undefined
 
   // Everything on this page reads from the ACTIVE variant, not the one in the
   // URL - so switching colour swaps photos, price and stock with no reload.
@@ -159,7 +163,7 @@ export function ProductDetail({
                 stock, price and photos, so a sold-out colour is shown as
                 unavailable rather than hidden - the customer can still see it
                 exists and ask about it. */}
-            {hasColours && (
+            {hasColourChoice && (
               <div className="mb-8">
                 <p className="text-sm font-medium text-brand-700 mb-3">
                   Colour
@@ -188,6 +192,16 @@ export function ProductDetail({
                     )
                   })}
                 </div>
+              </div>
+            )}
+
+            {/* One colour only - nothing to choose, but still worth stating. */}
+            {!hasColourChoice && singleColour && (
+              <div className="mb-8">
+                <p className="text-sm text-brand-700">
+                  <span className="font-medium">Colour</span>
+                  <span className="text-brand-500"> · {singleColour}</span>
+                </p>
               </div>
             )}
 

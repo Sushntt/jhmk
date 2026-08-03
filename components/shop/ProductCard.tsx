@@ -93,6 +93,14 @@ export function ProductCard({ product }: { product: Product }) {
               {product.name}
             </h3>
           </Link>
+          {/* Colour hint: "3 colours" when grouped, the single colour otherwise */}
+          {product.variantColours && product.variantColours.length > 0 && (
+            <p className="text-xs text-brand-500 mt-0.5">
+              {product.variantColours.length > 1
+                ? `${product.variantColours.length} colours`
+                : product.variantColours[0]}
+            </p>
+          )}
           <div className="flex items-center gap-2 mt-1">
             <span className="text-sm text-brand-900">{formatPrice(product.price)}</span>
             {product.originalPrice && (
