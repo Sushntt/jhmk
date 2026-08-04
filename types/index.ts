@@ -5,6 +5,8 @@ export interface Product {
   colour?: string
   /** Set only on grouped grid cards: every colour this piece comes in. */
   variantColours?: string[]
+  /** Video attachments from Airtable, shown after the photos in the gallery. */
+  videos?: { url: string; poster?: string }[]
   id: string
   name: string
   slug: string

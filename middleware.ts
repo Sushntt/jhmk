@@ -17,7 +17,12 @@ import type { NextRequest } from "next/server"
 // never reach the browser bundle.
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/analytics/:path*", "/api/debug-airtable/:path*"],
+  matcher: [
+    "/admin/:path*",
+    "/api/analytics/:path*",
+    "/api/debug-airtable/:path*",
+    "/api/admin/:path*",
+  ],
 }
 
 function unauthorized(message = "Authentication required") {

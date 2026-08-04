@@ -9,7 +9,9 @@
 //   - Description     (Long text)
 //   - Price           (Number)
 //   - Original Price  (Number, optional — shows a strikethrough price when set)
-//   - Images          (Attachment field — upload the product photos here. "Image" also works.)
+//   - Images          (Attachment field — product photos AND videos go here.
+//                     "Image" also works. HEIC/HEIF from iPhones is handled
+//                     automatically; MP4/MOV videos appear in the gallery.)
 //   - Category        (Single select: Necklaces, Bangles, Anklets, Bracelets)
 //   - Colour          (Single select, optional) -- ONE colour per row. To sell a
 //                     piece in several colours, create one row per colour with
@@ -150,10 +152,37 @@ function formatDateForAirtable(date: Date): string {
 function mapProduct(rec: any): Product {
   const f = rec.fields
   const stockCount = typeof f["Stock"] === "number" ? f["Stock"] : 0
-  const imageField = f["Images"] || f["Image"]
-  const images = Array.isArray(imageField)
-    ? imageField.map((img: any) => img?.url).filter((url: any) => typeof url === "string" && url.length > 0)
-    : []
+  const attachments = Array.isArray(f["Images"] || f["Image"]) ? (f["Images"] || f["Image"]) : []
+
+  /**
+   * Browsers other than Safari cannot display HEIC/HEIF, which is what iPhones
+   * produce by default - the file uploads to Airtable fine and then shows as a
+   * broken image on Android and Chrome.
+   *
+   * Airtable generates JPEG thumbnails for every image attachment, so for those
+   * formats we use the thumbnail instead of the original. Slightly lower
+   * resolution, but it actually displays, which beats a broken image.
+   */
+  const UNSUPPORTED = /heic|heif|tiff|avif/i
+
+  const images = attachments
+    .filter((a: any) => typeof a?.type === "string" && a.type.startsWith("image/"))
+    .map((a: any) => {
+      const needsConversion = UNSUPPORTED.test(a.type) || UNSUPPORTED.test(a.filename || "")
+      const thumb = a.thumbnails?.full?.url || a.thumbnails?.large?.url
+      return needsConversion ? thumb || a.url : a.url
+    })
+    .filter((url: any) => typeof url === "string" && url.length > 0)
+
+  /** Video attachments, shown in the gallery alongside the photos. */
+  const videos = attachments
+    .filter((a: any) => typeof a?.type === "string" && a.type.startsWith("video/"))
+    .map((a: any) => ({
+      url: a.url as string,
+      // Airtable renders a still for videos too, used as the poster frame
+      poster: (a.thumbnails?.large?.url || a.thumbnails?.full?.url) as string | undefined,
+    }))
+    .filter((v: any) => typeof v.url === "string" && v.url.length > 0)
 
   return {
     id: rec.id,
@@ -163,6 +192,7 @@ function mapProduct(rec: any): Product {
     price: f["Price"] || 0,
     originalPrice: f["Original Price"] || undefined,
     images: images.length > 0 ? images : ["/images/product-1.jpg"],
+    videos,
     category: f["Category"] || "Uncategorized",
     subcategory: f["Subcategory"] || undefined,
     tags: f["Tags"] ? String(f["Tags"]).split(",").map((t: string) => t.trim()) : [],

@@ -10,7 +10,7 @@ import { useCart } from "@/hooks/useCart"
 import { useWishlist } from "@/hooks/useWishlist"
 import { Reveal } from "@/components/animations/Reveal"
 import { Button } from "@/components/ui/Button"
-import { Heart, ShoppingBag, Minus, Plus, Check, Truck, Shield, MessageCircle, Maximize2 } from "lucide-react"
+import { Heart, ShoppingBag, Minus, Plus, Check, Truck, Shield, MessageCircle, Maximize2, Play } from "lucide-react"
 import { ProductCard } from "./ProductCard"
 import { RecentlyViewed } from "./RecentlyViewed"
 import { ProductDescription } from "./ProductDescription"
@@ -57,6 +57,13 @@ export function ProductDetail({
   }
 
   const handleSelectImage = (i: number) => setSelectedImage(i)
+
+  // Photos and videos share one index: 0..images.length-1 are photos, anything
+  // beyond that is a video.
+  const videos = active.videos || []
+  const mediaCount = active.images.length + videos.length
+  const isVideo = selectedImage >= active.images.length
+  const activeVideo = isVideo ? videos[selectedImage - active.images.length] : undefined
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const { addToCart, setIsOpen: setCartOpen } = useCart()
@@ -93,6 +100,21 @@ export function ProductDetail({
         {/* Images */}
         <Reveal direction="left">
           <div className="space-y-4">
+            {isVideo ? (
+              <div className="relative w-full aspect-square bg-brand-950 rounded-lg overflow-hidden">
+                <video
+                  key={activeVideo?.url}
+                  src={activeVideo?.url}
+                  poster={activeVideo?.poster}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="w-full h-full object-cover"
+                >
+                  Your browser cannot play this video.
+                </video>
+              </div>
+            ) : (
             <button
               type="button"
               onClick={() => setLightboxOpen(true)}
@@ -111,14 +133,16 @@ export function ProductDetail({
                 <Maximize2 className="w-4 h-4" />
               </span>
             </button>
+            )}
 
-            {/* Thumbnails scroll horizontally - a product with six images would
-                otherwise wrap and push the buy button below the fold. */}
-            {active.images.length > 1 && (
+            {/* Thumbnails cover photos and videos. Scrolls horizontally so a
+                product with several media items can't push the buy button
+                below the fold. */}
+            {mediaCount > 1 && (
               <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
                 {active.images.map((img, i) => (
                   <button
-                    key={i}
+                    key={`img-${i}`}
                     onClick={() => handleSelectImage(i)}
                     aria-label={`View image ${i + 1}`}
                     className={`relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-colors ${
@@ -128,6 +152,25 @@ export function ProductDetail({
                     <Image src={img} alt="" fill sizes="80px" className="object-cover" />
                   </button>
                 ))}
+
+                {videos.map((v, i) => {
+                  const idx = active.images.length + i
+                  return (
+                    <button
+                      key={`vid-${i}`}
+                      onClick={() => handleSelectImage(idx)}
+                      aria-label={`Play video ${i + 1}`}
+                      className={`relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 bg-brand-950 grid place-items-center transition-colors ${
+                        selectedImage === idx ? "border-gold-500" : "border-transparent hover:border-brand-300"
+                      }`}
+                    >
+                      {v.poster && (
+                        <Image src={v.poster} alt="" fill sizes="80px" className="object-cover opacity-70" />
+                      )}
+                      <Play className="relative w-5 h-5 text-white" />
+                    </button>
+                  )
+                })}
               </div>
             )}
           </div>
@@ -184,7 +227,7 @@ export function ProductDetail({
                             ? "border-brand-900 bg-brand-900 text-white"
                             : variant.inStock
                             ? "border-brand-200 text-brand-700 hover:border-brand-400"
-                            : "border-brand-200 text-brand-400 line-through"
+                            : "border-brand-200 text-brand-400 opacity-50"
                         }`}
                       >
                         {variant.colour}
@@ -340,7 +383,7 @@ export function ProductDetail({
       {lightboxOpen && (
         <ImageLightbox
           images={active.images}
-          index={selectedImage}
+          index={Math.min(selectedImage, active.images.length - 1)}
           alt={product.name}
           onClose={() => setLightboxOpen(false)}
           onIndexChange={setSelectedImage}

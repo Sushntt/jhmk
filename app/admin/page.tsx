@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Reveal } from "@/components/animations/Reveal"
 import { formatPrice, formatDate } from "@/lib/utils"
-import { TrendingUp, Users, ShoppingBag, DollarSign, Repeat } from "lucide-react"
+import { TrendingUp, Users, ShoppingBag, DollarSign, Repeat, RefreshCw } from "lucide-react"
+import { Button } from "@/components/ui/Button"
 
 interface CustomerSummary {
   name: string
@@ -165,8 +166,46 @@ export default function AdminDashboard() {
   const [source, setSource] = useState<"live" | "demo" | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    fetch("/api/analytics")
+  const [syncing, setSyncing] = useState(false)
+  const [syncMessage, setSyncMessage] = useState("")
+  const [syncOk, setSyncOk] = useState(true)
+
+  const runSync = async () => {
+    setSyncing(true)
+    setSyncMessage("")
+    try {
+      const res = await fetch("/api/admin/sync", { method: "POST" })
+      const result = await res.json()
+
+      if (!result.ok) {
+        setSyncOk(false)
+        setSyncMessage(result.error || "Sync failed.")
+      } else if (result.awaitingDeduction === 0) {
+        setSyncOk(true)
+        setSyncMessage("Nothing to deduct - all confirmed orders are already up to date.")
+      } else {
+        const failed = result.processed.filter((p: { ok: boolean }) => !p.ok)
+        setSyncOk(failed.length === 0)
+        setSyncMessage(
+          failed.length === 0
+            ? `Stock updated for ${result.processed.length} order(s).`
+            : `${result.processed.length - failed.length} updated, ${failed.length} failed: ${failed
+                .flatMap((f: { errors?: string[] }) => f.errors || [])
+                .join("; ")}`
+        )
+      }
+      // Refresh the figures so the dashboard reflects the change
+      loadAnalytics()
+    } catch {
+      setSyncOk(false)
+      setSyncMessage("Could not reach the server. Please try again.")
+    } finally {
+      setSyncing(false)
+    }
+  }
+
+  const loadAnalytics = useCallback(() => {
+    return fetch("/api/analytics")
       .then((res) => res.json())
       .then((json) => {
         setData(json.data)
@@ -174,6 +213,10 @@ export default function AdminDashboard() {
       })
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    loadAnalytics()
+  }, [loadAnalytics])
 
   if (loading) {
     return (
@@ -230,6 +273,31 @@ export default function AdminDashboard() {
           </Reveal>
         ))}
       </div>
+
+      {/* Manual stock sync. Airtable's "Run a script" automation is Pro-only,
+          so this gives the client a one-click way to apply stock deductions
+          without paying for a plan upgrade. */}
+      <Reveal className="mb-6">
+        <div className="bg-surface border border-brand-200 rounded-lg p-5 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-brand-900">Stock sync</p>
+            <p className="text-xs text-brand-500 mt-1">
+              Deducts stock for orders marked <strong>confirmed</strong> in Airtable.
+            </p>
+            {syncMessage && (
+              <p
+                className={`text-xs mt-2 ${syncOk ? "text-green-700" : "text-spice-700"}`}
+              >
+                {syncMessage}
+              </p>
+            )}
+          </div>
+          <Button onClick={runSync} disabled={syncing} variant="outline" className="flex-shrink-0">
+            <RefreshCw className={`w-4 h-4 mr-2 ${syncing ? "animate-spin" : ""}`} />
+            {syncing ? "Syncing…" : "Sync stock now"}
+          </Button>
+        </div>
+      </Reveal>
 
       {/* Pending orders need action - a row is written the moment a customer
           reaches WhatsApp, so these are enquiries, not confirmed sales. */}
