@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { motion } from "framer-motion"
 import { Reveal } from "@/components/animations/Reveal"
 import { Instagram, Mail, Phone, MapPin } from "lucide-react"
 import { siteConfig } from "@/lib/site-config"
@@ -22,16 +21,15 @@ export function Footer() {
                 and hand-picked from makers across India. Grace in every detail.
               </p>
               <div className="flex gap-4 mt-6">
-                <motion.a
+                <a
                   href={siteConfig.instagramUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Chinkara Jewels on Instagram"
-                  whileHover={{ scale: 1.1, y: -2 }}
                   className="p-2 bg-brand-900 rounded-full hover:bg-gold-600 transition-colors"
                 >
                   <Instagram className="w-4 h-4 text-white" />
-                </motion.a>
+                </a>
               </div>
             </div>
           </Reveal>

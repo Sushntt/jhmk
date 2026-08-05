@@ -2,7 +2,6 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { motion } from "framer-motion"
 import { Reveal } from "@/components/animations/Reveal"
 
 // The gazelle is the brand - "Chinkara takes its name from the Indian gazelle".
@@ -13,11 +12,7 @@ export function BrandStory() {
     <section className="py-24 px-4 sm:px-6 lg:px-8 bg-brand-50">
       <div className="max-w-4xl mx-auto text-center">
         <Reveal>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          <div
             className="relative w-20 h-20 mx-auto mb-8"
           >
             <Image
@@ -28,7 +23,7 @@ export function BrandStory() {
               sizes="80px"
               className="object-contain"
             />
-          </motion.div>
+          </div>
 
           <p className="text-xs tracking-[0.35em] uppercase text-gold-600 mb-6">The Name</p>
 

@@ -66,3 +66,89 @@
     transform: none !important;
   }
 }
+
+/* Scroll reveal
+   ------------------------------------------------------------------
+   Driven by a single IntersectionObserver that adds .reveal-visible once
+   and then stops watching, so scrolling back up never replays anything. */
+@layer components {
+  .reveal {
+    opacity: 0;
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    will-change: opacity, transform;
+  }
+  .reveal-up { transform: translate3d(0, 28px, 0); }
+  .reveal-down { transform: translate3d(0, -28px, 0); }
+  .reveal-left { transform: translate3d(28px, 0, 0); }
+  .reveal-right { transform: translate3d(-28px, 0, 0); }
+  .reveal-none { transform: none; }
+
+  .reveal-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    /* Once revealed the element is static, so release the compositor hint. */
+    will-change: auto;
+  }
+
+  /* Children of a stagger container step in one after another */
+  .reveal-stagger > * {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+    transition: opacity 0.45s ease-out, transform 0.45s ease-out;
+  }
+  .reveal-stagger.reveal-visible > * {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  .reveal-stagger.reveal-visible > *:nth-child(1) { transition-delay: 0s }
+  .reveal-stagger.reveal-visible > *:nth-child(2) { transition-delay: 0.06s }
+  .reveal-stagger.reveal-visible > *:nth-child(3) { transition-delay: 0.12s }
+  .reveal-stagger.reveal-visible > *:nth-child(4) { transition-delay: 0.18s }
+  .reveal-stagger.reveal-visible > *:nth-child(5) { transition-delay: 0.24s }
+  .reveal-stagger.reveal-visible > *:nth-child(n + 6) { transition-delay: 0.3s }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-stagger > * {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Cart/wishlist count badge popping in when the number changes */
+@layer components {
+  @keyframes badge-pop {
+    from { transform: scale(0) }
+    to { transform: scale(1) }
+  }
+  .animate-badge-pop {
+    animation: badge-pop 0.2s ease-out;
+  }
+}
+
+/* Hero entrance and ambient motion, in CSS rather than JavaScript */
+@layer components {
+  @keyframes hero-fade-up {
+    from { opacity: 0; transform: translate3d(0, 18px, 0) }
+    to { opacity: 1; transform: translate3d(0, 0, 0) }
+  }
+  @keyframes hero-zoom {
+    from { transform: scale(1.04) }
+    to { transform: scale(1) }
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0) }
+    50% { transform: translateY(8px) }
+  }
+
+  .hero-zoom { animation: hero-zoom 1.6s cubic-bezier(0.22, 1, 0.36, 1) both }
+
+  .hero-in { opacity: 0; animation: hero-fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) both }
+  .hero-in-1 { animation-delay: 0.25s }
+  .hero-in-2 { animation-delay: 0.5s }
+  .hero-in-3 { animation-delay: 1.4s }
+
+  .animate-bob { animation: bob 2.2s ease-in-out infinite }
+}

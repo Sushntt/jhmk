@@ -1,202 +1,116 @@
 "use client"
 
-import { motion, Variants } from "framer-motion"
-import { ReactNode } from "react"
+import { ReactNode, useEffect, useRef } from "react"
 
-interface RevealProps {
-  children: ReactNode
-  className?: string
-  delay?: number
-  duration?: number
-  direction?: "up" | "down" | "left" | "right" | "none"
-  distance?: number
-  once?: boolean
-  amount?: number
+/**
+ * Scroll reveal, built on one shared IntersectionObserver and CSS transitions.
+ *
+ * This used to be a Framer Motion component. With 62 of them on the site, that
+ * meant 62 animated React components and 62 separate observers - a large part of
+ * why the home and shop pages felt heavy. CSS transitions run on the compositor
+ * and cost nothing in JavaScript.
+ *
+ * Once an element has been revealed it is unobserved and the class stays put, so
+ * scrolling back up can never replay the animation.
+ */
+
+type Direction = "up" | "down" | "left" | "right" | "none"
+
+// One observer for the whole page rather than one per element.
+let observer: IntersectionObserver | null = null
+
+function getObserver(): IntersectionObserver | null {
+  if (typeof window === "undefined" || !("IntersectionObserver" in window)) return null
+
+  if (!observer) {
+    observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue
+          entry.target.classList.add("reveal-visible")
+          // Reveal once, then stop watching - no replay on scroll up.
+          observer?.unobserve(entry.target)
+        }
+      },
+      { rootMargin: "0px 0px -8% 0px", threshold: 0.05 }
+    )
+  }
+  return observer
+}
+
+function useReveal(delay: number) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+
+    if (delay) el.style.transitionDelay = `${delay}s`
+
+    const io = getObserver()
+    if (!io) {
+      // No observer support: show immediately rather than leaving it invisible.
+      el.classList.add("reveal-visible")
+      return
+    }
+
+    io.observe(el)
+    return () => io.unobserve(el)
+  }, [delay])
+
+  return ref
 }
 
 export function Reveal({
   children,
   className = "",
   delay = 0,
-  duration = 0.6,
   direction = "up",
-  distance = 40,
-  once = true,
-  amount = 0.2,
-}: RevealProps) {
-  const getInitialPosition = () => {
-    switch (direction) {
-      case "up": return { y: distance, x: 0 }
-      case "down": return { y: -distance, x: 0 }
-      case "left": return { x: distance, y: 0 }
-      case "right": return { x: -distance, y: 0 }
-      case "none": return { x: 0, y: 0 }
-    }
-  }
-
-  const variants: Variants = {
-    hidden: {
-      opacity: 0,
-      ...getInitialPosition(),
-    },
-    visible: {
-      opacity: 1,
-      x: 0,
-      y: 0,
-      transition: {
-        duration,
-        delay,
-        ease: [0.25, 0.1, 0.25, 1],
-      },
-    },
-  }
-
+}: {
+  children: ReactNode
+  className?: string
+  delay?: number
+  /** Kept for compatibility with existing call sites */
+  duration?: number
+  direction?: Direction
+  distance?: number
+  once?: boolean
+  amount?: number
+}) {
+  const ref = useReveal(delay)
   return (
-    <motion.div
-      className={className}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once, amount }}
-      variants={variants}
-    >
+    <div ref={ref} className={`reveal reveal-${direction} ${className}`}>
       {children}
-    </motion.div>
+    </div>
   )
 }
 
+/** Children fade in one after another as the container scrolls into view. */
 export function StaggerContainer({
   children,
   className = "",
-  staggerDelay = 0.1,
-  delay = 0,
 }: {
   children: ReactNode
   className?: string
   staggerDelay?: number
   delay?: number
 }) {
+  const ref = useReveal(0)
   return (
-    <motion.div
-      className={className}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.1 }}
-      variants={{
-        hidden: {},
-        visible: {
-          transition: {
-            staggerChildren: staggerDelay,
-            delayChildren: delay,
-          },
-        },
-      }}
-    >
+    <div ref={ref} className={`reveal-stagger ${className}`}>
       {children}
-    </motion.div>
+    </div>
   )
 }
 
 export function StaggerItem({
   children,
   className = "",
-  direction = "up",
-  distance = 30,
 }: {
   children: ReactNode
   className?: string
-  direction?: "up" | "down" | "left" | "right"
+  direction?: Direction
   distance?: number
 }) {
-  const getInitial = () => {
-    switch (direction) {
-      case "up": return { y: distance }
-      case "down": return { y: -distance }
-      case "left": return { x: distance }
-      case "right": return { x: -distance }
-    }
-  }
-
-  return (
-    <motion.div
-      className={className}
-      variants={{
-        hidden: { opacity: 0, ...getInitial() },
-        visible: {
-          opacity: 1,
-          x: 0,
-          y: 0,
-          transition: {
-            duration: 0.5,
-            ease: [0.25, 0.1, 0.25, 1],
-          },
-        },
-      }}
-    >
-      {children}
-    </motion.div>
-  )
-}
-
-export function FadeIn({
-  children,
-  className = "",
-  delay = 0,
-  duration = 0.5,
-}: {
-  children: ReactNode
-  className?: string
-  delay?: number
-  duration?: number
-}) {
-  return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration, delay, ease: "easeOut" }}
-    >
-      {children}
-    </motion.div>
-  )
-}
-
-export function ScaleIn({
-  children,
-  className = "",
-  delay = 0,
-}: {
-  children: ReactNode
-  className?: string
-  delay?: number
-}) {
-  return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.4, delay, ease: "easeOut" }}
-    >
-      {children}
-    </motion.div>
-  )
-}
-
-export function PageTransition({
-  children,
-  className = "",
-}: {
-  children: ReactNode
-  className?: string
-}) {
-  return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-    >
-      {children}
-    </motion.div>
-  )
+  return <div className={className}>{children}</div>
 }

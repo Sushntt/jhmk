@@ -1,28 +1,10 @@
 "use client"
 
-import { motion } from "framer-motion"
 import { Slot } from "@radix-ui/react-slot"
 import { cn } from "@/lib/utils"
 import { ReactNode, ButtonHTMLAttributes, forwardRef } from "react"
 
-// Omit native event handlers whose signatures conflict with framer-motion's
-// MotionProps (onDrag, onAnimationStart, etc.) — combining motion.* with
-// ButtonHTMLAttributes directly is a known TS friction point that can pass
-// or fail depending on the exact TypeScript patch version resolved at install time.
-type ConflictingHandlers =
-  | "onDrag"
-  | "onDragStart"
-  | "onDragEnd"
-  | "onDragEnter"
-  | "onDragExit"
-  | "onDragLeave"
-  | "onDragOver"
-  | "onDrop"
-  | "onAnimationStart"
-  | "onAnimationEnd"
-  | "onAnimationIteration"
-
-interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, ConflictingHandlers> {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "outline" | "ghost" | "gold"
   size?: "sm" | "md" | "lg"
   isLoading?: boolean
@@ -30,13 +12,20 @@ interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, Conf
   children: ReactNode
 }
 
-// motion-enabled Slot so asChild buttons (e.g. wrapping a <Link>) still get
-// the same hover/tap animation as a real <button>
-const MotionSlot = motion(Slot)
-
+/**
+ * Hover and press feedback are CSS transforms rather than Framer Motion.
+ *
+ * Every button on the site used to be a motion component, which meant dozens of
+ * React-driven animations on a page. CSS does the same job on the compositor.
+ * It also removed the need to omit conflicting drag/animation event types,
+ * so the props type is now just the native button interface.
+ */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "primary", size = "md", isLoading, asChild, children, disabled, ...props }, ref) => {
-    const baseStyles = "inline-flex items-center justify-center font-medium tracking-wide transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+    const baseStyles =
+      "inline-flex items-center justify-center font-medium tracking-wide transition-[background-color,color,border-color,transform] duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed " +
+      // Hover scale only on real pointer devices, so a tap can't leave it stuck
+      "[@media(hover:hover)]:hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100 disabled:active:scale-100"
 
     const variants = {
       primary: "bg-brand-900 text-white hover:bg-brand-800 focus:ring-brand-900",
@@ -64,33 +53,22 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       children
     )
 
-    // asChild: render the animated wrapper around the child element (e.g. Link)
-    // instead of a real <button>, so it doesn't produce invalid nested buttons/anchors.
+    const classes = cn(baseStyles, variants[variant], sizes[size], className)
+
+    // asChild wraps the child element (e.g. a Link) instead of rendering a real
+    // <button>, so we never produce an anchor nested inside a button.
     if (asChild) {
       return (
-        <MotionSlot
-          ref={ref}
-          className={cn(baseStyles, variants[variant], sizes[size], className)}
-          whileHover={{ scale: disabled || isLoading ? 1 : 1.02 }}
-          whileTap={{ scale: disabled || isLoading ? 1 : 0.98 }}
-          {...props}
-        >
+        <Slot ref={ref} className={classes} {...props}>
           {content}
-        </MotionSlot>
+        </Slot>
       )
     }
 
     return (
-      <motion.button
-        ref={ref}
-        className={cn(baseStyles, variants[variant], sizes[size], className)}
-        whileHover={{ scale: disabled || isLoading ? 1 : 1.02 }}
-        whileTap={{ scale: disabled || isLoading ? 1 : 0.98 }}
-        disabled={disabled || isLoading}
-        {...props}
-      >
+      <button ref={ref} className={classes} disabled={disabled || isLoading} {...props}>
         {content}
-      </motion.button>
+      </button>
     )
   }
 )

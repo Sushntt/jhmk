@@ -1,54 +1,36 @@
 "use client"
 
-import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { ButtonHTMLAttributes, forwardRef, ReactNode } from "react"
 
-type ConflictingHandlers =
-  | "onDrag"
-  | "onDragStart"
-  | "onDragEnd"
-  | "onDragEnter"
-  | "onDragExit"
-  | "onDragLeave"
-  | "onDragOver"
-  | "onDrop"
-  | "onAnimationStart"
-  | "onAnimationEnd"
-  | "onAnimationIteration"
-
-interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, ConflictingHandlers> {
+interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode
   badge?: number
   variant?: "default" | "ghost"
 }
 
+/** Hover and press feedback in CSS - see Button for the reasoning. */
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
   ({ className, children, badge, variant = "default", ...props }, ref) => {
     return (
-      <motion.button
+      <button
         ref={ref}
         className={cn(
-          "relative p-2 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2",
+          "relative p-2 rounded-full transition-[background-color,transform] duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2",
+          "[@media(hover:hover)]:hover:scale-110 active:scale-90",
           variant === "default" && "hover:bg-brand-100 text-brand-900",
           variant === "ghost" && "hover:bg-surface/10 text-white",
           className
         )}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
         {...props}
       >
         {children}
         {badge !== undefined && badge > 0 && (
-          <motion.span
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="absolute -top-1 -right-1 bg-gold-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center"
-          >
+          <span className="absolute -top-1 -right-1 bg-gold-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center animate-badge-pop">
             {badge > 9 ? "9+" : badge}
-          </motion.span>
+          </span>
         )}
-      </motion.button>
+      </button>
     )
   }
 )

@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { motion } from "framer-motion"
 import { Reveal } from "@/components/animations/Reveal"
 
 // The three moods are real brand content from Chinkara's own copy, not filler.
@@ -40,9 +39,7 @@ export function Collections() {
           {collections.map((c, i) => (
             <Reveal key={c.name} delay={i * 0.12}>
               <Link href="/shop" className="group block h-full">
-                <motion.div
-                  whileHover={{ backgroundColor: "rgba(196,132,30,0.06)" }}
-                  transition={{ duration: 0.3 }}
+                <div
                   className="h-full bg-brand-900 p-10 flex flex-col"
                 >
                   {/* The rule grows on hover - a small, quiet signal rather than a
@@ -54,7 +51,7 @@ export function Collections() {
                   </h3>
                   <p className="text-brand-300 text-sm leading-relaxed mb-4 flex-1">{c.line}</p>
                   <p className="text-xs text-brand-500 tracking-wide">{c.detail}</p>
-                </motion.div>
+                </div>
               </Link>
             </Reveal>
           ))}

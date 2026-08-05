@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
 import { ShoppingBag, Heart, Menu, X, Search, User, LogOut, ChevronRight } from "lucide-react"
 import { useCart } from "@/hooks/useCart"
 import type { CategoryTile } from "@/lib/categories"
@@ -60,10 +59,7 @@ export function Navbar() {
 
   return (
     <>
-      <motion.header
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+      <header
         className={cn(
           "fixed top-9 left-0 right-0 z-50 transition-[background-color,box-shadow] duration-300 ease-out",
           isHome
@@ -75,15 +71,14 @@ export function Navbar() {
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link href="/" className="flex items-center">
-              <motion.span
+              <span
                 className={cn(
                   "text-2xl font-serif tracking-widest uppercase",
                   isHome ? "text-white" : "text-brand-900"
                 )}
-                whileHover={{ scale: 1.02 }}
               >
                 Chinkara
-              </motion.span>
+              </span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -186,22 +181,15 @@ export function Navbar() {
             </div>
           </div>
         </div>
-      </motion.header>
+      </header>
 
       {/* Mobile Menu */}
-      <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
+          <div
             className="fixed inset-0 z-40 bg-surface pt-32 px-6"
           >
             <nav className="flex flex-col gap-6 overflow-y-auto max-h-[calc(100vh-10rem)] pb-10">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
+              <div
               >
                 <Link
                   href="/"
@@ -210,14 +198,11 @@ export function Navbar() {
                 >
                   Home
                 </Link>
-              </motion.div>
+              </div>
 
               {/* All Products expands in place rather than navigating away, so
                   the shopper can pick a category without losing the menu. */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.05 }}
+              <div
               >
                 <button
                   onClick={() => setProductsOpen((o) => !o)}
@@ -233,10 +218,7 @@ export function Navbar() {
                 </button>
 
                 {productsOpen && (
-                  <motion.ul
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.2 }}
+                  <ul
                     className="mt-4 ml-1 border-l border-brand-200 pl-4 space-y-3"
                   >
                     <li>
@@ -260,16 +242,13 @@ export function Navbar() {
                         </Link>
                       </li>
                     ))}
-                  </motion.ul>
+                  </ul>
                 )}
-              </motion.div>
+              </div>
 
               {mobileLinks.map((link, i) => (
-                <motion.div
+                <div
                   key={link.href}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: (i + 1) * 0.06 }}
                 >
                   <Link
                     href={link.href}
@@ -278,12 +257,9 @@ export function Navbar() {
                   >
                     {link.label}
                   </Link>
-                </motion.div>
+                </div>
               ))}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 }}
+              <div
                 className="pt-6 border-t border-brand-200"
               >
                 {user ? (
@@ -303,11 +279,10 @@ export function Navbar() {
                     Sign In with Google
                   </button>
                 )}
-              </motion.div>
+              </div>
             </nav>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
 
       <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </>
