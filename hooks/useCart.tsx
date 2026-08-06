@@ -24,14 +24,45 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const saved = localStorage.getItem("chinkara-cart")
+    let restored: CartItem[] = []
+
     if (saved) {
       try {
-        setItems(JSON.parse(saved))
+        restored = JSON.parse(saved)
+        setItems(restored)
       } catch (e) {
         console.error("Failed to parse cart", e)
       }
     }
     setIsLoaded(true)
+
+    /**
+     * Refresh saved items against the live catalogue.
+     *
+     * Airtable attachment URLs expire after a couple of hours, so a cart
+     * restored the next day had dead image links and showed blank thumbnails.
+     * Re-fetching also picks up any price or stock change since the item was
+     * added, so nobody checks out against a stale price.
+     *
+     * Anything no longer in the catalogue is dropped from the cart.
+     */
+    if (restored.length === 0) return
+
+    const ids = Array.from(new Set(restored.map((i) => i.product.id))).join(",")
+
+    fetch(`/api/products/by-ids?ids=${encodeURIComponent(ids)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        const fresh = new Map<string, Product>(
+          (data.products || []).map((p: Product) => [p.id, p])
+        )
+        setItems((prev) =>
+          prev
+            .filter((i) => fresh.has(i.product.id))
+            .map((i) => ({ ...i, product: fresh.get(i.product.id)! }))
+        )
+      })
+      .catch((e) => console.error("Could not refresh cart items:", e))
   }, [])
 
   useEffect(() => {

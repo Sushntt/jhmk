@@ -16,7 +16,7 @@ export function CartDrawer() {
   const { items, isOpen, setIsOpen, removeFromCart, updateQuantity, totalPrice, addToCart } = useCart()
 
   // Back gesture on a phone closes the drawer instead of leaving the shop
-  useBackToClose(isOpen, () => setIsOpen(false))
+  const { closeForNavigation } = useBackToClose(isOpen, () => setIsOpen(false))
   const router = useRouter()
   const [deals, setDeals] = useState<Product[]>([])
 
@@ -33,7 +33,7 @@ export function CartDrawer() {
   const visibleDeals = deals.filter((d) => !items.some((i) => i.product.id === d.id))
 
   const handleProceedToCheckout = () => {
-    setIsOpen(false)
+    closeForNavigation()
     router.push("/checkout")
   }
 
@@ -81,7 +81,7 @@ export function CartDrawer() {
                   <p className="text-brand-400 text-sm mb-6">
                     Discover our handcrafted collection
                   </p>
-                  <Button onClick={() => setIsOpen(false)} variant="outline" asChild>
+                  <Button onClick={closeForNavigation} variant="outline" asChild>
                     <Link href="/shop">Continue Shopping</Link>
                   </Button>
                 </div>
@@ -100,7 +100,7 @@ export function CartDrawer() {
                           tapping the picture is the obvious thing to try. */}
                       <Link
                         href={`/shop/${item.product.slug}`}
-                        onClick={() => setIsOpen(false)}
+                        onClick={closeForNavigation}
                         className="relative w-24 h-24 bg-brand-100 rounded-lg overflow-hidden flex-shrink-0 group"
                       >
                         <Image
@@ -115,7 +115,7 @@ export function CartDrawer() {
                         <Link
                           href={`/shop/${item.product.slug}`}
                           className="text-sm font-medium text-brand-900 hover:text-gold-600 transition-colors line-clamp-1"
-                          onClick={() => setIsOpen(false)}
+                          onClick={closeForNavigation}
                         >
                           {item.product.name}
                         </Link>
@@ -169,7 +169,7 @@ export function CartDrawer() {
                       <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
                         {visibleDeals.map((deal) => (
                           <div key={deal.id} className="flex-shrink-0 w-24 text-center">
-                            <Link href={`/shop/${deal.slug}`} onClick={() => setIsOpen(false)}>
+                            <Link href={`/shop/${deal.slug}`} onClick={closeForNavigation}>
                               <div className="relative w-24 h-24 bg-brand-50 rounded-lg overflow-hidden mb-2">
                                 <Image src={deal.images[0]} alt={deal.name} fill className="object-cover" />
                               </div>
@@ -220,7 +220,7 @@ export function CartDrawer() {
 
                 <Button
                   variant="outline"
-                  onClick={() => setIsOpen(false)}
+                  onClick={closeForNavigation}
                   className="w-full"
                   asChild
                 >

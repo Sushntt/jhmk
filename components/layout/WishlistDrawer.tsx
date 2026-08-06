@@ -14,7 +14,7 @@ export function WishlistDrawer() {
   const { items, isOpen, setIsOpen, removeFromWishlist } = useWishlist()
 
   // Back gesture on a phone closes the drawer instead of leaving the shop
-  useBackToClose(isOpen, () => setIsOpen(false))
+  const { closeForNavigation } = useBackToClose(isOpen, () => setIsOpen(false))
   const { addToCart } = useCart()
 
   const handleAddToCart = (product: typeof items[0]) => {
@@ -63,7 +63,7 @@ export function WishlistDrawer() {
                   <p className="text-brand-400 text-sm mb-6">
                     Save your favourite pieces for later
                   </p>
-                  <Button onClick={() => setIsOpen(false)} variant="outline" asChild>
+                  <Button onClick={closeForNavigation} variant="outline" asChild>
                     <Link href="/shop">Explore Collection</Link>
                   </Button>
                 </div>
@@ -81,7 +81,7 @@ export function WishlistDrawer() {
                     >
                       <Link
                         href={`/shop/${item.slug}`}
-                        onClick={() => setIsOpen(false)}
+                        onClick={closeForNavigation}
                         className="relative w-24 h-24 bg-brand-100 rounded-lg overflow-hidden flex-shrink-0"
                       >
                         <Image
@@ -96,7 +96,7 @@ export function WishlistDrawer() {
                         <Link
                           href={`/shop/${item.slug}`}
                           className="text-sm font-medium text-brand-900 hover:text-gold-600 transition-colors line-clamp-1"
-                          onClick={() => setIsOpen(false)}
+                          onClick={closeForNavigation}
                         >
                           {item.name}
                         </Link>
@@ -134,7 +134,7 @@ export function WishlistDrawer() {
               <div className="border-t border-brand-100 p-6">
                 <Button
                   variant="outline"
-                  onClick={() => setIsOpen(false)}
+                  onClick={closeForNavigation}
                   className="w-full"
                   asChild
                 >

@@ -14,7 +14,7 @@ import { Heart, ShoppingBag, Minus, Plus, Check, Truck, Shield, MessageCircle, M
 import { ProductCard } from "./ProductCard"
 import { RecentlyViewed } from "./RecentlyViewed"
 import { ProductDescription } from "./ProductDescription"
-import { ImageLightbox } from "./ImageLightbox"
+import { ImageLightbox, type LightboxMedia } from "./ImageLightbox"
 
 export function ProductDetail({
   product,
@@ -64,6 +64,12 @@ export function ProductDetail({
   const mediaCount = active.images.length + videos.length
   const isVideo = selectedImage >= active.images.length
   const activeVideo = isVideo ? videos[selectedImage - active.images.length] : undefined
+
+  // Photos and videos in one list, so the lightbox can browse the whole gallery
+  const lightboxMedia: LightboxMedia[] = [
+    ...active.images.map((url) => ({ type: "image" as const, url })),
+    ...videos.map((v) => ({ type: "video" as const, url: v.url, poster: v.poster })),
+  ]
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const { addToCart, setIsOpen: setCartOpen } = useCart()
@@ -382,8 +388,8 @@ export function ProductDetail({
 
       {lightboxOpen && (
         <ImageLightbox
-          images={active.images}
-          index={Math.min(selectedImage, active.images.length - 1)}
+          media={lightboxMedia}
+          index={selectedImage}
           alt={product.name}
           onClose={() => setLightboxOpen(false)}
           onIndexChange={setSelectedImage}

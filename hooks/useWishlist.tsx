@@ -77,7 +77,27 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     activeKey.current = key
     setItems(stored)
     setIsLoaded(true)
+    refresh(stored)
   }, [user, authLoading])
+
+  /**
+   * Same expiry problem as the cart: Airtable image URLs go stale after a
+   * couple of hours, so saved pieces showed blank thumbnails on a later visit.
+   */
+  function refresh(saved: Product[]) {
+    if (saved.length === 0) return
+    const ids = Array.from(new Set(saved.map((p) => p.id))).join(",")
+
+    fetch(`/api/products/by-ids?ids=${encodeURIComponent(ids)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        const fresh = new Map<string, Product>(
+          (data.products || []).map((p: Product) => [p.id, p])
+        )
+        setItems((prev) => prev.filter((p) => fresh.has(p.id)).map((p) => fresh.get(p.id)!))
+      })
+      .catch((e) => console.error("Could not refresh wishlist items:", e))
+  }
 
   // Persist
   useEffect(() => {
