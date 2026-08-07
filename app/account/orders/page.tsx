@@ -78,12 +78,26 @@ export default function OrdersPage() {
     if (user.email) params.set("email", user.email)
     if (user.phone) params.set("phone", user.phone)
 
+    // `cancelled` stops a slow response updating state after the component
+    // has unmounted (e.g. the shopper navigated away mid-request).
+    let cancelled = false
     setLoadingOrders(true)
+
     fetch(`/api/orders/mine?${params.toString()}`)
       .then((res) => res.json())
-      .then((data) => setOrders(data.orders || []))
-      .catch(() => setOrders([]))
-      .finally(() => setLoadingOrders(false))
+      .then((data) => {
+        if (!cancelled) setOrders(data.orders || [])
+      })
+      .catch(() => {
+        if (!cancelled) setOrders([])
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingOrders(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [user])
 
   if (isLoading) {

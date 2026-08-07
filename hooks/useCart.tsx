@@ -50,12 +50,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     const ids = Array.from(new Set(restored.map((i) => i.product.id))).join(",")
 
+    let cancelled = false
+
     fetch(`/api/products/by-ids?ids=${encodeURIComponent(ids)}`)
       .then((res) => res.json())
       .then((data) => {
+        if (cancelled) return
         const fresh = new Map<string, Product>(
           (data.products || []).map((p: Product) => [p.id, p])
         )
+        // Functional update so anything added while this was in flight is kept
         setItems((prev) =>
           prev
             .filter((i) => fresh.has(i.product.id))
@@ -63,11 +67,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         )
       })
       .catch((e) => console.error("Could not refresh cart items:", e))
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {
-    if (isLoaded) {
+    if (!isLoaded) return
+    try {
       localStorage.setItem("chinkara-cart", JSON.stringify(items))
+    } catch (e) {
+      // Private browsing and full storage both throw here. Losing the saved
+      // cart is recoverable; an uncaught error would blank the whole page.
+      console.error("Could not save cart", e)
     }
   }, [items, isLoaded])
 

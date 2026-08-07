@@ -22,10 +22,20 @@ export function CartDrawer() {
 
   useEffect(() => {
     if (isOpen) {
+      let cancelled = false
+
       fetch("/api/deals")
         .then((res) => res.json())
-        .then((data) => setDeals(data.deals || []))
-        .catch(() => setDeals([]))
+        .then((data) => {
+          if (!cancelled) setDeals(data.deals || [])
+        })
+        .catch(() => {
+          if (!cancelled) setDeals([])
+        })
+
+      return () => {
+        cancelled = true
+      }
     }
   }, [isOpen])
 

@@ -39,10 +39,20 @@ export function Navbar() {
   // than on every page load.
   useEffect(() => {
     if (!productsOpen || categories.length > 0) return
+    let cancelled = false
+
     fetch("/api/categories")
       .then((r) => r.json())
-      .then((d) => setCategories(d.categories || []))
-      .catch(() => setCategories([]))
+      .then((d) => {
+        if (!cancelled) setCategories(d.categories || [])
+      })
+      .catch(() => {
+        if (!cancelled) setCategories([])
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [productsOpen, categories.length])
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const pathname = usePathname()

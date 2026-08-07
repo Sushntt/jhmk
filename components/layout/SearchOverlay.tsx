@@ -20,7 +20,7 @@ interface SearchResult {
 
 export function SearchOverlay({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   // Back gesture closes the search rather than leaving the page
-  useBackToClose(isOpen, onClose)
+  const { closeForNavigation } = useBackToClose(isOpen, onClose)
 
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<SearchResult[]>([])
@@ -66,8 +66,8 @@ export function SearchOverlay({ isOpen, onClose }: { isOpen: boolean; onClose: (
     e.preventDefault()
     const trimmed = query.trim()
     if (trimmed) {
+      closeForNavigation()
       router.push(`/shop?search=${encodeURIComponent(trimmed)}`)
-      onClose()
     }
   }
 
@@ -119,7 +119,7 @@ export function SearchOverlay({ isOpen, onClose }: { isOpen: boolean; onClose: (
                     <Link
                       key={product.id}
                       href={`/shop/${product.slug}`}
-                      onClick={onClose}
+                      onClick={closeForNavigation}
                       className="flex items-center gap-4 p-3 rounded-lg hover:bg-brand-50 transition-colors"
                     >
                       <div className="relative w-14 h-14 bg-brand-100 rounded-md overflow-hidden flex-shrink-0">

@@ -21,15 +21,29 @@ export function RecentlyViewed({ currentProductId }: { currentProductId: string 
 
     // Record the current product at the front, deduped, capped
     const updated = [currentProductId, ...ids.filter((id) => id !== currentProductId)].slice(0, MAX_ITEMS)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+    } catch {
+      // Private browsing / full storage - not worth breaking the page over
+    }
 
     const toShow = updated.filter((id) => id !== currentProductId)
     if (toShow.length === 0) return
 
+    let cancelled = false
+
     fetch(`/api/products/by-ids?ids=${toShow.join(",")}`)
       .then((res) => res.json())
-      .then((data) => setProducts(data.products || []))
-      .catch(() => setProducts([]))
+      .then((data) => {
+        if (!cancelled) setProducts(data.products || [])
+      })
+      .catch(() => {
+        if (!cancelled) setProducts([])
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [currentProductId])
 
   if (products.length === 0) return null
