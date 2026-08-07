@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
@@ -57,6 +57,52 @@ export function ProductDetail({
   }
 
   const handleSelectImage = (i: number) => setSelectedImage(i)
+
+  /**
+   * Swipe left/right on the main image to move through the gallery, while a
+   * plain tap still opens the enlarged view.
+   *
+   * Pointer events cover touch, mouse and stylus in one path. The distinction
+   * between a swipe and a tap is horizontal distance: anything over 40px is
+   * treated as a swipe and suppresses the tap, so dragging never accidentally
+   * opens the lightbox.
+   */
+  const swipeStart = useRef<{ x: number; y: number } | null>(null)
+  const didSwipe = useRef(false)
+
+  const goToMedia = (delta: number) => {
+    if (mediaCount <= 1) return
+    setSelectedImage((i) => (i + delta + mediaCount) % mediaCount)
+  }
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    swipeStart.current = { x: e.clientX, y: e.clientY }
+    didSwipe.current = false
+  }
+
+  const onPointerUp = (e: React.PointerEvent) => {
+    const start = swipeStart.current
+    swipeStart.current = null
+    if (!start) return
+
+    const dx = e.clientX - start.x
+    const dy = e.clientY - start.y
+
+    // Ignore mostly-vertical movement so page scrolling still works
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+      didSwipe.current = true
+      goToMedia(dx < 0 ? 1 : -1)
+    }
+  }
+
+  const onImageClick = () => {
+    // A swipe just finished - don't also open the enlarged view
+    if (didSwipe.current) {
+      didSwipe.current = false
+      return
+    }
+    setLightboxOpen(true)
+  }
 
   // Photos and videos share one index: 0..images.length-1 are photos, anything
   // beyond that is a video.
@@ -121,11 +167,15 @@ export function ProductDetail({
                 </video>
               </div>
             ) : (
+            // touch-pan-y below keeps vertical page scrolling working while
+            // horizontal drags are handled as swipes
             <button
               type="button"
-              onClick={() => setLightboxOpen(true)}
-              aria-label="View larger image"
-              className="group relative block w-full aspect-square bg-brand-100 rounded-lg overflow-hidden cursor-zoom-in"
+              onClick={onImageClick}
+              onPointerDown={onPointerDown}
+              onPointerUp={onPointerUp}
+              aria-label="View larger image. Swipe left or right to browse."
+              className="group relative block w-full aspect-square bg-brand-100 rounded-lg overflow-hidden cursor-zoom-in touch-pan-y select-none"
             >
               <Image
                 src={active.images[selectedImage]}
