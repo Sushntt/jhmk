@@ -215,9 +215,41 @@ export async function getProducts(): Promise<Product[]> {
   const records: Product[] = []
   let offset: string | undefined
 
+  /**
+   * Fetching WITH a view is what makes the client's own ordering apply.
+   *
+   * Without a view parameter Airtable returns records in an unspecified order,
+   * so dragging rows around in the grid had no effect on the site. Naming the
+   * view means the site mirrors exactly what they see in Airtable, including
+   * any sort they have set on it.
+   *
+   * AIRTABLE_PRODUCTS_VIEW overrides the default if their view is named
+   * something else. If the view is missing the request would fail, so that case
+   * falls back to an unordered fetch rather than showing an empty shop.
+   */
+  const view = process.env.AIRTABLE_PRODUCTS_VIEW || "Grid view"
+  let useView = true
+
   do {
-    const query = offset ? `?offset=${offset}` : ""
-    const data = await airtableRequest(`${encodeURIComponent(PRODUCTS_TABLE)}${query}`)
+    const params = new URLSearchParams()
+    if (offset) params.set("offset", offset)
+    if (useView) params.set("view", view)
+
+    let data
+    try {
+      data = await airtableRequest(
+        `${encodeURIComponent(PRODUCTS_TABLE)}?${params.toString()}`
+      )
+    } catch (err) {
+      if (!useView) throw err
+      // Named view doesn't exist - retry without it so the shop still loads
+      console.error(
+        `Airtable view "${view}" not found; falling back to unordered fetch. ` +
+          `Set AIRTABLE_PRODUCTS_VIEW to your view name to restore ordering.`
+      )
+      useView = false
+      continue
+    }
     for (const rec of data.records || []) {
       records.push(mapProduct(rec))
     }

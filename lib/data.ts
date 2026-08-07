@@ -2,6 +2,7 @@ import { cache } from "react"
 import { Product } from "@/types"
 import { isAirtableConfigured, getProducts as getAirtableProducts } from "@/lib/airtable"
 import { mockProducts } from "@/lib/mock-data"
+import { maybeSyncStock } from "@/lib/auto-sync"
 
 // In production we never fall back to demo products. Showing 12 fake pieces
 // with stock photos would let a real customer order something that doesn't
@@ -23,6 +24,10 @@ const allowDemoFallback = process.env.NODE_ENV !== "production"
  * live - important, since the client relies on stock being accurate.
  */
 export const getAllProducts = cache(async function getAllProducts(): Promise<Product[]> {
+  // Fire-and-forget: keeps stock in step with confirmed orders without relying
+  // on an external scheduler. Never awaited, so it cannot slow a page load.
+  maybeSyncStock()
+
   if (!isAirtableConfigured) {
     if (allowDemoFallback) return mockProducts
     console.error("Airtable is not configured in production - returning no products.")
